@@ -206,6 +206,42 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     ).then((_) => _loadAllScreenData());
   }
 
+  void _confirmDeleteTransaction(BuildContext context, Transaction tx, TransactionProvider tp) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Hapus Transaksi?', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text('Apakah kamu yakin ingin menghapus transaksi "${tx.description}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Batal', style: TextStyle(color: Colors.grey.shade600)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await tp.remove(tx.id!);
+              _loadAllScreenData();
+            },
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTransactionTab(BuildContext context, TransactionProvider tp) {
     if (tp.loading) return const Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0)));
     if (tp.transactions.isEmpty) {
@@ -248,7 +284,15 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
-              onLongPress: () => _showTxOptions(context, tx, tp),
+              onTap: () {
+                // Ketuk biasa membuka form edit untuk memudahkan pengguna
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
+                  ),
+                ).then((_) => _loadAllScreenData());
+              },
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -281,9 +325,37 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                         ],
                       ),
                     ),
-                    Text(
-                      CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
+                                  ),
+                                ).then((_) => _loadAllScreenData());
+                              },
+                              child: const Icon(Icons.edit_outlined, size: 18, color: Colors.indigo),
+                            ),
+                            const SizedBox(width: 16),
+                            GestureDetector(
+                              onTap: () => _confirmDeleteTransaction(context, tx, tp),
+                              child: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -434,42 +506,6 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         ],
         const SizedBox(height: 32),
       ],
-    );
-  }
-
-  void _showTxOptions(BuildContext context, Transaction tx, TransactionProvider tp) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
-            ListTile(
-              leading: const Icon(Icons.edit_outlined, color: Colors.indigo),
-              title: const Text('Edit Transaksi', style: TextStyle(fontWeight: FontWeight.w500)),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => AddTransactionScreen(group: widget.group, existing: tx)),
-                ).then((_) => _loadAllScreenData());
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: Colors.red),
-              title: const Text('Hapus Transaksi', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await tp.remove(tx.id!);
-                _loadAllScreenData();
-              },
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
