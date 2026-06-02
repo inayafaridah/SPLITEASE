@@ -1,4 +1,4 @@
-// providers/group_provider.dart — Orang 1
+// lib/providers/group_provider.dart
 import 'package:flutter/material.dart';
 import '../models/group.dart';
 import '../db/group_dao.dart';
@@ -34,13 +34,14 @@ class GroupProvider extends ChangeNotifier {
     return id;
   }
 
-  Future<void> updateGroup(Group group) async {
-    await _dao.update(group);
+  // ←←← METHOD INI YANG DIBUTUHKAN OLEH HOME SCREEN
+  Future<void> rename(int id, String newName, {String? currency}) async {
+    await _dao.updateName(id, newName, currency: currency);
     await loadAll();
   }
 
-  Future<void> rename(int id, String newName, {String? currency}) async {
-    await _dao.updateName(id, newName, currency: currency);
+  Future<void> updateGroup(Group group) async {
+    await _dao.update(group);
     await loadAll();
   }
 

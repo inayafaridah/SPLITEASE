@@ -1,12 +1,14 @@
-// screens/add_transaction_screen.dart — Orang 1
+// screens/add_transaction_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/group.dart';
 import '../models/transaction.dart';
+import '../models/contact.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/contact_provider.dart';
+import '../providers/group_member_provider.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final Group group;
@@ -26,6 +28,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   int? _selectedPayerId;
   DateTime _date = DateTime.now();
   bool _submitting = false;
+  List<Contact> _groupMembersContacts = [];
+  bool _isLoadingMembers = true;
 
   bool get isEdit => widget.existing != null;
 
@@ -39,9 +43,27 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _selectedPayerId = tx.payerContactId;
       _date = DateTime.tryParse(tx.date) ?? DateTime.now();
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ContactProvider>().loadAll();
-    });
+    _loadFilteredGroupMembers();
+  }
+
+  // Mengambil data anggota grup secara spesifik
+  Future<void> _loadFilteredGroupMembers() async {
+    final contactProvider = context.read<ContactProvider>();
+    final memberProvider = context.read<GroupMemberProvider>();
+
+    // Ambil semua kontak global dan daftar ID anggota grup ini
+    await contactProvider.loadAll();
+    final memberIds = await memberProvider.getMembers(widget.group.id!);
+
+    if (mounted) {
+      setState(() {
+        // Filter: Hanya ambil kontak yang ID-nya ada di dalam daftar member grup ini
+        _groupMembersContacts = contactProvider.contacts
+            .where((c) => memberIds.contains(c.id))
+            .toList();
+        _isLoadingMembers = false;
+      });
+    }
   }
 
   @override
@@ -92,104 +114,105 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final contacts = context.watch<ContactProvider>().contacts;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(isEdit ? 'Edit Transaksi' : 'Tambah Transaksi'),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Description
-            TextFormField(
-              controller: _descCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Keterangan',
-                hintText: 'Contoh: Makan ramen',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.description),
-              ),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Keterangan wajib diisi' : null,
-            ),
-            const SizedBox(height: 16),
+      body: _isLoadingMembers
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Description
+                  TextFormField(
+                    controller: _descCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Keterangan',
+                      hintText: 'Contoh: Makan ramen',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.description),
+                    ),
+                    validator: (v) => v == null || v.trim().isEmpty
+                        ? 'Keterangan wajib diisi'
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
 
-            // Amount
-            TextFormField(
-              controller: _amountCtrl,
-              decoration: InputDecoration(
-                labelText: 'Jumlah (${widget.group.currency})',
-                hintText: '150000',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.attach_money),
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator: (v) {
-                if (v == null || v.isEmpty) return 'Jumlah wajib diisi';
-                if (double.tryParse(v) == null || double.parse(v) <= 0) {
-                  return 'Masukkan jumlah yang valid';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
+                  // Amount
+                  TextFormField(
+                    controller: _amountCtrl,
+                    decoration: InputDecoration(
+                      labelText: 'Jumlah (${widget.group.currency})',
+                      hintText: '150000',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.attach_money),
+                    ),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Jumlah wajib diisi';
+                      if (double.tryParse(v) == null || double.parse(v) <= 0) {
+                        return 'Masukkan jumlah yang valid';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
 
-            // Payer
-            DropdownButtonFormField<int>(
-              value: _selectedPayerId,
-              decoration: const InputDecoration(
-                labelText: 'Yang Membayar',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
-              ),
-              items: contacts
-                  .map((c) => DropdownMenuItem(
-                        value: c.id,
-                        child: Text(c.name),
-                      ))
-                  .toList(),
-              onChanged: (v) => setState(() => _selectedPayerId = v),
-              hint: contacts.isEmpty
-                  ? const Text('Belum ada kontak — tambah dulu')
-                  : const Text('Pilih pembayar'),
-            ),
-            const SizedBox(height: 16),
+                  // Payer (Dropdown Tersinkron dengan Grup)
+                  DropdownButtonFormField<int>(
+                    value: _selectedPayerId,
+                    decoration: const InputDecoration(
+                      labelText: 'Yang Membayar',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                    items: _groupMembersContacts
+                        .map((c) => DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedPayerId = v),
+                    hint: _groupMembersContacts.isEmpty
+                        ? const Text('Tidak ada anggota di grup ini')
+                        : const Text('Pilih pembayar'),
+                  ),
+                  const SizedBox(height: 16),
 
-            // Date
-            ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: BorderSide(color: Colors.grey.shade400),
-              ),
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Tanggal'),
-              subtitle: Text(DateFormat('dd MMMM yyyy').format(_date)),
-              onTap: _pickDate,
-            ),
-            const SizedBox(height: 24),
+                  // Date
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Colors.grey.shade400),
+                    ),
+                    leading: const Icon(Icons.calendar_today),
+                    title: const Text('Tanggal'),
+                    subtitle: Text(DateFormat('dd MMMM yyyy').format(_date)),
+                    onTap: _pickDate,
+                  ),
+                  const SizedBox(height: 24),
 
-            // Submit
-            ElevatedButton.icon(
-              onPressed: _submitting ? null : _submit,
-              icon: _submitting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.save),
-              label: Text(isEdit ? 'Simpan Perubahan' : 'Tambah Transaksi'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
+                  // Submit
+                  ElevatedButton.icon(
+                    onPressed: _submitting ? null : _submit,
+                    icon: _submitting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.save),
+                    label: Text(isEdit ? 'Simpan Perubahan' : 'Tambah Transaksi'),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

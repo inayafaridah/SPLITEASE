@@ -1,8 +1,4 @@
-// widgets/debt_balance_card.dart — Orang 1: custom widget dengan animasi
-// Menampilkan ringkasan saldo hutang masuk/keluar dengan:
-// - Animated counter saat nilai berubah
-// - Expandable untuk detail
-// - Tap untuk lihat breakdown
+// widgets/debt_balance_card.dart
 import 'package:flutter/material.dart';
 import '../services/split_calculator.dart';
 import '../utils/currency_formatter.dart';
@@ -79,7 +75,7 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
     final b = widget.summary.balance;
     if (b > 1) return 'Berpiutang';
     if (b < -1) return 'Berhutang';
-    return 'Lunas';
+    return 'Lunas ✓';
   }
 
   @override
@@ -114,7 +110,6 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    // Avatar
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: _balanceColor.withOpacity(0.15),
@@ -132,14 +127,14 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(s.contact.name,
-                              style: const TextStyle(fontWeight: FontWeight.w600)),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600)),
                           Text(_statusLabel,
                               style: TextStyle(
                                   color: _balanceColor, fontSize: 12)),
                         ],
                       ),
                     ),
-                    // Animated balance
                     AnimatedBuilder(
                       animation: _valueAnim,
                       builder: (_, __) => Text(
@@ -171,8 +166,8 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
                     : CrossFadeState.showFirst,
                 firstChild: const SizedBox.shrink(),
                 secondChild: Padding(
-                  padding:
-                      const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+                  padding: const EdgeInsets.only(
+                      left: 16, right: 16, bottom: 12),
                   child: Column(
                     children: [
                       const Divider(),
@@ -189,8 +184,16 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
                             currency: widget.currency),
                         Colors.grey,
                       ),
+                      if (s.settled != 0) ...[
+                        const SizedBox(height: 4),
+                        _detailRow(
+                          'Sudah Dilunasi',
+                          CurrencyFormatter.format(s.settled.abs(),
+                              currency: widget.currency),
+                          Colors.green,
+                        ),
+                      ],
                       const SizedBox(height: 8),
-                      // Mini progress bar: paid vs share
                       _buildProgressBar(s.paid, s.share),
                     ],
                   ),
@@ -206,7 +209,9 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
   Widget _detailRow(String label, String value, Color color) => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          Text(label,
+              style:
+                  const TextStyle(color: Colors.grey, fontSize: 13)),
           Text(value,
               style: TextStyle(
                   color: color,
@@ -248,7 +253,8 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
               child: Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.orange, width: 2),
+                  border:
+                      Border.all(color: Colors.orange, width: 2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -272,10 +278,13 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            decoration:
+                BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 10, color: Colors.grey)),
         ],
       );
 }

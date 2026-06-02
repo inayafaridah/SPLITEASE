@@ -1,10 +1,11 @@
-// app.dart — shared: theme & bottom nav router
+// lib/app.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/group_provider.dart';
 import 'providers/transaction_provider.dart';
 import 'providers/contact_provider.dart';
 import 'providers/settlement_provider.dart';
+import 'providers/group_member_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/contacts_screen.dart';
 import 'screens/history_screen.dart';
@@ -21,6 +22,7 @@ class SplitagApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TransactionProvider()),
         ChangeNotifierProvider(create: (_) => ContactProvider()),
         ChangeNotifierProvider(create: (_) => SettlementProvider()),
+        ChangeNotifierProvider(create: (_) => GroupMemberProvider()), // ← Penting
       ],
       child: MaterialApp(
         title: 'Splitage',
@@ -41,24 +43,15 @@ class SplitagApp extends StatelessWidget {
             centerTitle: false,
             elevation: 0,
           ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          ),
         ),
-        home: const _MainShell(),
+        home: const _MainShell(),   // Tetap const, ini biasanya aman
       ),
     );
   }
 }
 
 class _MainShell extends StatefulWidget {
-  const _MainShell();
+  const _MainShell({super.key});   // ← Pastikan ada {super.key}
 
   @override
   State<_MainShell> createState() => _MainShellState();

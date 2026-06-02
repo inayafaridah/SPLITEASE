@@ -1,4 +1,3 @@
-// main.dart — shared: entry point
 import 'package:flutter/material.dart';
 import 'app.dart';
 

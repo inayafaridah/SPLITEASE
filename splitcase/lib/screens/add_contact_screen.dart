@@ -1,4 +1,3 @@
-// screens/add_contact_screen.dart — Orang 2
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/contact.dart';
@@ -118,10 +117,12 @@ class _AddContactScreenState extends State<AddContactScreen> {
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
-                labelText: 'Nomor HP (opsional)',
+                labelText: 'Nomor HP',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.phone),
               ),
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Nomor HP wajib diisi' : null,
             ),
             const SizedBox(height: 16),
 
