@@ -185,6 +185,7 @@ class _SettleScreenState extends State<SettleScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
+            _buildTransferVisual(contactsToShow),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -306,6 +307,7 @@ class _SettleScreenState extends State<SettleScreen> {
                   ],
                   TextFormField(
                     controller: _amountCtrl,
+                    onChanged: (v) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: 'Total Dana Pelunasan',
                       labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
@@ -399,6 +401,125 @@ class _SettleScreenState extends State<SettleScreen> {
             const SizedBox(height: 40),
           ],
         ),
+      ),
+    );
+  }
+
+  Color _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return Colors.indigo;
+    try {
+      return Color(int.parse(hex.replaceFirst('#', '0xFF')));
+    } catch (_) {
+      return Colors.indigo;
+    }
+  }
+
+  Widget _buildTransferVisual(List<Contact> contactsToShow) {
+    if (_fromId == null || _toId == null || contactsToShow.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final fromContact = contactsToShow.firstWhere((c) => c.id == _fromId, orElse: () => Contact(name: '?', phone: ''));
+    final toContact = contactsToShow.firstWhere((c) => c.id == _toId, orElse: () => Contact(name: '?', phone: ''));
+    final amountText = _amountCtrl.text.isEmpty ? '0' : _amountCtrl.text;
+    
+    double amountVal = double.tryParse(amountText) ?? 0.0;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF11998e).withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: 26,
+                    backgroundColor: _parseColor(fromContact.avatarColor),
+                    child: Text(
+                      fromContact.initials,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  fromContact.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Text('Membayar', style: TextStyle(color: Colors.white70, fontSize: 11)),
+              ],
+            ),
+          ),
+          
+          Column(
+            children: [
+              Text(
+                amountVal > 0 
+                  ? 'Rp ${NumberFormat('#,###', 'id_ID').format(amountVal)}' 
+                  : 'Rp 0',
+                style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 16),
+              ),
+              const SizedBox(height: 4),
+              const Row(
+                children: [
+                  Icon(Icons.chevron_right_rounded, color: Colors.white, size: 24),
+                  Icon(Icons.chevron_right_rounded, color: Colors.white, size: 24),
+                ],
+              ),
+            ],
+          ),
+          
+          Expanded(
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: 26,
+                    backgroundColor: _parseColor(toContact.avatarColor),
+                    child: Text(
+                      toContact.initials,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  toContact.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Text('Menerima', style: TextStyle(color: Colors.white70, fontSize: 11)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -154,8 +154,22 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                         width: 52,
                                         height: 52,
                                         decoration: BoxDecoration(
-                                          color: _parseColor(contact.avatarColor),
-                                          borderRadius: BorderRadius.circular(14),
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              _parseColor(contact.avatarColor),
+                                              _parseColor(contact.avatarColor).withRed((_parseColor(contact.avatarColor).red - 20).clamp(0, 255)),
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(16),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: _parseColor(contact.avatarColor).withOpacity(0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
                                         ),
                                         child: Center(
                                           child: Text(
@@ -231,12 +245,26 @@ class _ContactsScreenState extends State<ContactsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Kontak?'),
-        content: Text('Hapus "${c.name}" dari daftar kontak?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Hapus Kontak?', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text('Apakah kamu yakin ingin menghapus "${c.name}" dari daftar kontak?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Batal', style: TextStyle(color: Colors.grey.shade600)),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () async {
               await cp.remove(c.id!);
               if (ctx.mounted) Navigator.pop(ctx);
