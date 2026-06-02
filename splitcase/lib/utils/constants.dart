@@ -1,7 +1,7 @@
 // lib/utils/constants.dart
 const String kAppName = 'Splitage';
 const String kDbName = 'splitage.db';
-const int kDbVersion = 3;   // Harus 3 atau lebih tinggi
+const int kDbVersion = 3;   
 
 // Table names
 const String kTableGroups = 'groups';

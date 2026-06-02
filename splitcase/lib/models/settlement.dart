@@ -1,23 +1,22 @@
-// lib/models/settlement.dart
 class Settlement {
   final int? id;
-  final int? groupId;           // ← Baru: support grup
+  final int? groupId;           
   final int fromContactId;
   final int toContactId;
   final double amount;
   final String date;
   final String note;
-  final int isPaid;             // 0 = pending, 1 = paid
+  final int isPaid;             
 
   Settlement({
     this.id,
-    this.groupId,               // ← Ditambahkan
+    this.groupId,              
     required this.fromContactId,
     required this.toContactId,
     required this.amount,
     String? date,
     this.note = '',
-    this.isPaid = 0,            // ← Default 0 (pending)
+    this.isPaid = 0,           
   }) : date = date ?? DateTime.now().toIso8601String();
 
   bool get paid => isPaid == 1;

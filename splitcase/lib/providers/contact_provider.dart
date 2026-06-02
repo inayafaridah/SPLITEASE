@@ -1,4 +1,3 @@
-// providers/contact_provider.dart — Orang 2
 import 'package:flutter/material.dart';
 import '../models/contact.dart';
 import '../db/contact_dao.dart';

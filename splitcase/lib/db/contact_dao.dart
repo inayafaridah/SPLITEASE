@@ -1,4 +1,3 @@
-// db/contact_dao.dart — Orang 2: CRUD for contacts
 import 'package:sqflite/sqflite.dart';
 import '../models/contact.dart';
 import '../utils/constants.dart';

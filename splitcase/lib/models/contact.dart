@@ -1,4 +1,3 @@
-// models/contact.dart — Orang 2
 class Contact {
   final int? id;
   final String name;
