@@ -430,14 +430,14 @@ class _SettleScreenState extends State<SettleScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+          colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF11998e).withOpacity(0.2),
+            color: const Color(0xFF4A00E0).withOpacity(0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

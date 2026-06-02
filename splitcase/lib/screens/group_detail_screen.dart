@@ -638,13 +638,13 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Green Success Header
+                  // Signature Theme Success Header
                   Container(
                     width: double.maxFinite,
                     padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                        colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -660,7 +660,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                           ),
                           child: const Icon(
                             Icons.check_circle_rounded,
-                            color: Color(0xFF11998e),
+                            color: Color(0xFF4A00E0),
                             size: 40,
                           ),
                         ),
