@@ -74,133 +74,164 @@ class _AddContactScreenState extends State<AddContactScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: const Color(0xFF2D3142),
         title: Text(isEdit ? 'Edit Data Kontak' : 'Tambah Kontak Baru', style: const TextStyle(fontWeight: FontWeight.bold)),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+            ],
+          ),
+        ),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
-            const SizedBox(height: 8),
             Center(
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  CircleAvatar(
-                    radius: 46,
-                    backgroundColor: _parseColor(_avatarColor),
-                    child: Text(
-                      _nameCtrl.text.isNotEmpty ? _nameCtrl.text[0].toUpperCase() : '?',
-                      style: const TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: _parseColor(_avatarColor).withOpacity(0.3), width: 3),
+                    ),
+                    child: CircleAvatar(
+                      radius: 46,
+                      backgroundColor: _parseColor(_avatarColor),
+                      child: Text(
+                        _nameCtrl.text.trim().isNotEmpty ? _nameCtrl.text.trim()[0].toUpperCase() : '?',
+                        style: const TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 6, offset: const Offset(0, 2))],
+                    ),
                     child: Icon(Icons.palette_rounded, size: 20, color: _parseColor(_avatarColor)),
                   )
                 ],
               ),
             ),
-            const SizedBox(height: 28),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextFormField(
-                      controller: _nameCtrl,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        labelText: 'Nama Lengkap',
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        prefixIcon: const Icon(Icons.person_outline_rounded),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Nama wajib diisi' : null,
+            const SizedBox(height: 32),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    controller: _nameCtrl,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Nama Lengkap',
+                      labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                      filled: true,
+                      fillColor: const Color(0xFFF4F6F9),
+                      prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF4A00E0)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _phoneCtrl,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Nomor WhatsApp / HP',
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        prefixIcon: const Icon(Icons.phone_android_rounded),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Nomor HP wajib diisi' : null,
+                    validator: (v) => v == null || v.trim().isEmpty ? 'Nama wajib diisi' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _phoneCtrl,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: 'Nomor WhatsApp / HP',
+                      labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                      filled: true,
+                      fillColor: const Color(0xFFF4F6F9),
+                      prefixIcon: const Icon(Icons.phone_android_rounded, color: Color(0xFF4A00E0)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
                     ),
-                  ],
-                ),
+                    validator: (v) => v == null || v.trim().isEmpty ? 'Nomor HP wajib diisi' : null,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Tema Warna Avatar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
-                    const SizedBox(height: 12),
-                    Center(
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: _colorOptions
-                            .map((hex) => GestureDetector(
-                                  onTap: () => setState(() => _avatarColor = hex),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: _parseColor(hex),
-                                      shape: BoxShape.circle,
-                                      border: _avatarColor == hex ? Border.all(width: 3, color: Colors.white) : null,
-                                      boxShadow: _avatarColor == hex
-                                          ? [BoxShadow(color: _parseColor(hex).withOpacity(0.4), blurRadius: 6, spreadRadius: 2)]
-                                          : null,
-                                    ),
-                                    child: _avatarColor == hex ? const Icon(Icons.check_rounded, color: Colors.white, size: 20) : null,
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Tema Warna Avatar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142))),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: _colorOptions
+                          .map((hex) => GestureDetector(
+                                onTap: () => setState(() => _avatarColor = hex),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: _parseColor(hex),
+                                    shape: BoxShape.circle,
+                                    border: _avatarColor == hex ? Border.all(width: 3, color: Colors.white) : null,
+                                    boxShadow: _avatarColor == hex
+                                        ? [BoxShadow(color: _parseColor(hex).withOpacity(0.4), blurRadius: 8, spreadRadius: 2)]
+                                        : [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
                                   ),
-                                ))
-                            .toList(),
-                      ),
+                                  child: _avatarColor == hex ? const Icon(Icons.check_rounded, color: Colors.white, size: 24) : null,
+                                ),
+                              ))
+                          .toList(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: _submitting ? null : _submit,
               icon: _submitting
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.save_rounded),
-              label: Text(isEdit ? 'Simpan Perubahan' : 'Tambah Kontak', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.save_rounded, size: 22),
+              label: Text(isEdit ? 'Simpan Perubahan' : 'Tambah Kontak', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
+                backgroundColor: const Color(0xFF4A00E0),
                 foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                minimumSize: const Size.fromHeight(56),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 4,
+                shadowColor: const Color(0xFF4A00E0).withOpacity(0.4),
               ),
             ),
+            const SizedBox(height: 40),
           ],
         ),
       ),

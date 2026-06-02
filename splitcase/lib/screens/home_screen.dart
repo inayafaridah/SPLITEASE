@@ -393,120 +393,257 @@ class _HomeScreenState extends State<HomeScreen> {
     final gp = context.watch<GroupProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-        title: const Text('Splitage', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.people_alt_outlined),
-            tooltip: 'Kelola Kontak',
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddContactScreen()))
-                .then((_) => context.read<ContactProvider>().loadAll()),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Pengaturan',
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: gp.loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
-          : gp.groups.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(color: Colors.indigo.shade50, shape: BoxShape.circle),
-                        child: const Icon(Icons.group_outlined, size: 80, color: Colors.indigo),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text('Belum ada grup', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
-                      const SizedBox(height: 8),
-                      Text('Buat grup untuk mulai split tagihan', style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
-                    ],
+      backgroundColor: const Color(0xFFF4F6F9), // Soft premium background
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: const Color(0xFF4A00E0),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  itemCount: gp.groups.length,
-                  itemBuilder: (ctx, i) {
-                    final group = gp.groups[i];
-                    return Card(
-                      elevation: 0,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: BorderSide(color: Colors.grey.shade200),
-                      ),
-                      color: Colors.white,
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        leading: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.indigo.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              group.name[0].toUpperCase(),
-                              style: const TextStyle(color: Colors.indigo, fontWeight: FontWeight.bold, fontSize: 18),
-                            ),
-                          ),
-                        ),
-                        title: Text(group.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Row(
-                            children: [
-                              Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade500),
-                              const SizedBox(width: 4),
-                              Text(
-                                DateFormat('dd MMM yyyy').format(DateTime.parse(group.createdAt)),
-                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.edit_outlined, size: 20, color: Colors.grey.shade600),
-                              tooltip: 'Edit Grup',
-                              onPressed: () => _showEditGroupDialog(context, group),
+                            const Text(
+                              'Splitage',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1.2,
+                              ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.delete_outline, size: 20, color: Colors.red.shade400),
-                              tooltip: 'Hapus Grup',
-                              onPressed: () => _confirmDelete(context, group),
-                            ),
-                            Icon(Icons.chevron_right, color: Colors.grey.shade400),
+                            Row(
+                              children: [
+                                _buildGlassIconButton(
+                                  icon: Icons.people_alt_outlined,
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddContactScreen())).then((_) => context.read<ContactProvider>().loadAll()),
+                                ),
+                                const SizedBox(width: 12),
+                                _buildGlassIconButton(
+                                  icon: Icons.settings_outlined,
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                                ),
+                              ],
+                            )
                           ],
                         ),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => GroupDetailScreen(group: group)),
-                        ).then((_) => gp.loadAll()),
-                      ),
-                    );
-                  },
+                        const Spacer(),
+                        const Text(
+                          'Kelola tagihanmu',
+                          style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Mudah & Cepat',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
                 ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: gp.loading
+                ? const Padding(
+                    padding: EdgeInsets.all(40),
+                    child: Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0))),
+                  )
+                : gp.groups.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: gp.groups.length,
+                        itemBuilder: (ctx, i) {
+                          final group = gp.groups[i];
+                          return _buildGroupCard(context, group);
+                        },
+                      ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.indigo,
+        backgroundColor: const Color(0xFF4A00E0),
         foregroundColor: Colors.white,
-        elevation: 4,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         onPressed: () => _showAddGroupDialog(context),
-        icon: const Icon(Icons.add, size: 22),
-        label: const Text('Grup Baru', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3)),
+        icon: const Icon(Icons.add_rounded, size: 24),
+        label: const Text('Grup Baru', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      ),
+    );
+  }
+
+  Widget _buildGlassIconButton({required IconData icon, required VoidCallback onTap}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
+          ),
+          child: Icon(icon, color: Colors.white, size: 22),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 80),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A00E0).withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.group_outlined, size: 80, color: Color(0xFF4A00E0)),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Belum ada grup',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF2D3142)),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Buat grup pertamamu untuk mulai\npatungan dengan teman-teman!',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 15, height: 1.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupCard(BuildContext context, Group group) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => GroupDetailScreen(group: group)),
+          ).then((_) => context.read<GroupProvider>().loadAll()),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: Text(
+                      group.name[0].toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        group.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Color(0xFF2D3142),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_month_rounded, size: 14, color: Colors.grey.shade500),
+                          const SizedBox(width: 6),
+                          Text(
+                            DateFormat('dd MMM yyyy').format(DateTime.parse(group.createdAt)),
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.edit_outlined, size: 22, color: Colors.grey.shade400),
+                      tooltip: 'Edit Grup',
+                      onPressed: () => _showEditGroupDialog(context, group),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete_outline, size: 22, color: Colors.red.shade300),
+                      tooltip: 'Hapus Grup',
+                      onPressed: () => _confirmDelete(context, group),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

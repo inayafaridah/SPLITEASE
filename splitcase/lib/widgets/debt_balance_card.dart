@@ -87,19 +87,15 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
         onTap: () => setState(() => _expanded = !_expanded),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Theme.of(context).cardColor,
-            border: Border.all(
-              color: _balanceColor.withOpacity(0.4),
-              width: 1.5,
-            ),
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: _balanceColor.withOpacity(0.08),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -107,31 +103,48 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
             children: [
               // Header row
               Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: _balanceColor.withOpacity(0.15),
-                      child: Text(
-                        s.contact.initials,
-                        style: TextStyle(
-                          color: _balanceColor,
-                          fontWeight: FontWeight.bold,
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _balanceColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          s.contact.initials,
+                          style: TextStyle(
+                            color: _balanceColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(s.contact.name,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600)),
-                          Text(_statusLabel,
-                              style: TextStyle(
-                                  color: _balanceColor, fontSize: 12)),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFF2D3142))),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _balanceColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(_statusLabel,
+                                style: TextStyle(
+                                    color: _balanceColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                          ),
                         ],
                       ),
                     ),
@@ -145,15 +158,15 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
                         style: TextStyle(
                           color: _balanceColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
+                          fontSize: 16,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 8),
                     Icon(
-                      _expanded ? Icons.expand_less : Icons.expand_more,
-                      color: Colors.grey,
-                      size: 20,
+                      _expanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                      color: Colors.grey.shade400,
+                      size: 24,
                     ),
                   ],
                 ),
@@ -167,33 +180,34 @@ class _DebtBalanceCardState extends State<DebtBalanceCard>
                 firstChild: const SizedBox.shrink(),
                 secondChild: Padding(
                   padding: const EdgeInsets.only(
-                      left: 16, right: 16, bottom: 12),
+                      left: 16, right: 16, bottom: 16),
                   child: Column(
                     children: [
-                      const Divider(),
+                      Divider(color: Colors.grey.shade100, height: 1),
+                      const SizedBox(height: 12),
                       _detailRow(
                         'Total Dibayar',
                         CurrencyFormatter.format(s.paid,
                             currency: widget.currency),
-                        Colors.blue,
+                        Colors.blue.shade600,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       _detailRow(
                         'Bagian Fair',
                         CurrencyFormatter.format(s.share,
                             currency: widget.currency),
-                        Colors.grey,
+                        Colors.grey.shade700,
                       ),
                       if (s.settled != 0) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         _detailRow(
                           'Sudah Dilunasi',
                           CurrencyFormatter.format(s.settled.abs(),
                               currency: widget.currency),
-                          Colors.green,
+                          Colors.green.shade600,
                         ),
                       ],
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       _buildProgressBar(s.paid, s.share),
                     ],
                   ),

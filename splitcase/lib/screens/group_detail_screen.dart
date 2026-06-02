@@ -84,92 +84,113 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     final total = SplitCalculator.totalExpense(tp.transactions);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-        title: Text(widget.group.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_card_rounded),
-            tooltip: 'Tambah Transaksi',
-            onPressed: () => _addTransaction(),
-          ),
-          const SizedBox(width: 8),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          indicatorWeight: 3,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          tabs: const [
-            Tab(icon: Icon(Icons.receipt_long_rounded), text: 'Transaksi'),
-            Tab(icon: Icon(Icons.account_balance_wallet_rounded), text: 'Hutang'),
-          ],
-        ),
-      ),
+      backgroundColor: const Color(0xFFF4F6F9),
       body: _isLoadingMembers
-          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
-          : Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.indigo, Colors.indigo.shade800],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(color: Colors.indigo.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Total Pengeluaran Grup',
-                              style: TextStyle(color: Colors.indigo.shade100, fontSize: 12, fontWeight: FontWeight.w500)),
-                          const SizedBox(height: 4),
-                          Text(
-                            CurrencyFormatter.format(total, currency: widget.group.currency),
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ],
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0)))
+          : NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverAppBar(
+                    expandedHeight: 220,
+                    pinned: true,
+                    elevation: 0,
+                    backgroundColor: const Color(0xFF4A00E0),
+                    iconTheme: const IconThemeData(color: Colors.white),
+                    title: Text(widget.group.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.add_card_rounded),
+                        tooltip: 'Tambah Transaksi',
+                        onPressed: () => _addTransaction(),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          children: [
-                            Text('${tp.transactions.length}',
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                            Text('Transaksi', style: TextStyle(color: Colors.indigo.shade100, fontSize: 10)),
+                      const SizedBox(width: 8),
+                    ],
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 60, left: 24, right: 24),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text('Total Pengeluaran Grup',
+                                    style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500)),
+                                const SizedBox(height: 8),
+                                Text(
+                                  CurrencyFormatter.format(total, currency: widget.group.currency),
+                                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5),
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 16),
+                                      const SizedBox(width: 8),
+                                      Text('${tp.transactions.length} Transaksi',
+                                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(60),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                        ),
+                        child: TabBar(
+                          controller: _tabController,
+                          indicatorColor: const Color(0xFF4A00E0),
+                          indicatorWeight: 3,
+                          labelColor: const Color(0xFF4A00E0),
+                          unselectedLabelColor: Colors.grey.shade500,
+                          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          tabs: const [
+                            Tab(icon: Icon(Icons.receipt_long_rounded), text: 'Transaksi'),
+                            Tab(icon: Icon(Icons.account_balance_wallet_rounded), text: 'Hutang'),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
+                ];
+              },
+              body: Container(
+                color: Colors.white,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildTransactionTab(context, tp),
+                    _buildDebtTab(context, debts, summaries, sp.settlements),
+                  ],
                 ),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildTransactionTab(context, tp),
-                      _buildDebtTab(context, debts, summaries, sp.settlements),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.indigo,
+        backgroundColor: const Color(0xFF4A00E0),
         foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         onPressed: _addTransaction,
         child: const Icon(Icons.add_rounded, size: 28),
       ),
@@ -186,16 +207,21 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   Widget _buildTransactionTab(BuildContext context, TransactionProvider tp) {
-    if (tp.loading) return const Center(child: CircularProgressIndicator(color: Colors.indigo));
+    if (tp.loading) return const Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0)));
     if (tp.transactions.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey.shade400),
-            const SizedBox(height: 12),
-            Text('Belum ada transaksi', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
-            Text('Tekan tombol + untuk menambahkan', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.05), shape: BoxShape.circle),
+              child: const Icon(Icons.receipt_long_outlined, size: 64, color: Color(0xFF4A00E0)),
+            ),
+            const SizedBox(height: 16),
+            const Text('Belum ada transaksi', style: TextStyle(color: Color(0xFF2D3142), fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Tekan tombol + untuk menambahkan', style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
           ],
         ),
       );
@@ -203,36 +229,66 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
 
     final cp = context.read<ContactProvider>();
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       itemCount: tp.transactions.length,
       itemBuilder: (ctx, i) {
         final tx = tp.transactions[i];
         final payerName = cp.nameById(tx.payerContactId);
-        return Card(
-          elevation: 0,
-          margin: const EdgeInsets.only(bottom: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade100),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+            ],
           ),
-          color: Colors.white,
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            leading: CircleAvatar(
-              backgroundColor: Colors.indigo.shade50,
-              foregroundColor: Colors.indigo,
-              child: Text(payerName.isNotEmpty ? payerName[0].toUpperCase() : '?', style: const TextStyle(fontWeight: FontWeight.bold)),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onLongPress: () => _showTxOptions(context, tx, tp),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4A00E0).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: Text(
+                          payerName.isNotEmpty ? payerName[0].toUpperCase() : '?',
+                          style: const TextStyle(color: Color(0xFF4A00E0), fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tx.description, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142))),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Oleh $payerName · ${DateFormat('dd MMM').format(DateTime.tryParse(tx.date) ?? DateTime.now())}',
+                            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            title: Text(tx.description, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-            subtitle: Text(
-              'Dibayar oleh $payerName · ${DateFormat('dd MMM').format(DateTime.tryParse(tx.date) ?? DateTime.now())}',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-            ),
-            trailing: Text(
-              CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 15),
-            ),
-            onLongPress: () => _showTxOptions(context, tx, tp),
           ),
         );
       },
@@ -246,92 +302,137 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     List<Settlement> settlements,
   ) {
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       children: [
         ...summaries.map((s) => DebtBalanceCard(summary: s, currency: widget.group.currency)),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-          child: Divider(),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 12),
-          child: Text('Perhitungan Penyelesaian Otomatis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
-        ),
+        const SizedBox(height: 20),
+        const Text('Penyelesaian Otomatis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
+        const SizedBox(height: 12),
         if (debts.isEmpty)
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.green.shade100)),
             child: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green.shade700),
-                const SizedBox(width: 10),
-                Text('Semua tagihan sudah lunas! 🎉', style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.bold)),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: Colors.green.shade100, shape: BoxShape.circle),
+                  child: Icon(Icons.check_circle, color: Colors.green.shade700, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Semua Lunas! 🎉', style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(height: 4),
+                      Text('Tidak ada hutang yang tersisa di grup ini.', style: TextStyle(color: Colors.green.shade700, fontSize: 13)),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ...debts.map((d) => Card(
-              elevation: 0,
-              margin: const EdgeInsets.only(bottom: 8),
-              color: Colors.amber.shade50,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.amber.shade200)),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                leading: const Icon(Icons.arrow_forward_rounded, color: Colors.amber, size: 24),
-                title: Text('${d.debtor.name} → ${d.creditor.name}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-                subtitle: const Text('Ketuk untuk mencatat pelunasan', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                trailing: Text(
-                  CurrencyFormatter.format(d.amount, currency: widget.group.currency),
-                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SettleScreen(
-                      groupId: widget.group.id,
-                      presetFromId: d.debtor.id,
-                      presetToId: d.creditor.id,
-                      presetAmount: d.amount,
+        ...debts.map((d) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SettleScreen(
+                        groupId: widget.group.id,
+                        presetFromId: d.debtor.id,
+                        presetToId: d.creditor.id,
+                        presetAmount: d.amount,
+                      ),
+                    ),
+                  ).then((_) => _loadAllScreenData()),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.amber.shade200)),
+                          child: const Icon(Icons.arrow_forward_rounded, color: Colors.amber, size: 20),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${d.debtor.name} → ${d.creditor.name}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF2D3142))),
+                              const SizedBox(height: 4),
+                              const Text('Ketuk untuk mencatat pelunasan', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(d.amount, currency: widget.group.currency),
+                          style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ],
                     ),
                   ),
-                ).then((_) => _loadAllScreenData()),
+                ),
               ),
             )),
         if (settlements.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(left: 4, bottom: 12),
-            child: Text('Riwayat Pembayaran Selesai', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
-          ),
+          const SizedBox(height: 24),
+          const Text('Riwayat Pelunasan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
+          const SizedBox(height: 12),
           ...settlements.map((s) {
             final cp = context.read<ContactProvider>();
             final fromName = cp.nameById(s.fromContactId);
             final toName = cp.nameById(s.toContactId);
-            return Card(
-              elevation: 0,
-              margin: const EdgeInsets.only(bottom: 8),
-              color: Colors.green.shade50.withOpacity(0.5), 
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.green.shade100)),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.green.shade100,
-                  child: const Icon(Icons.check_rounded, color: Colors.green, size: 18),
-                ),
-                title: Text('$fromName → $toName', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                subtitle: Text(
-                    DateFormat('dd MMM yyyy').format(DateTime.tryParse(s.date) ?? DateTime.now()),
-                    style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                trailing: Text(
-                  CurrencyFormatter.format(s.amount, currency: widget.group.currency),
-                  style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold),
-                ),
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade100),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.check_rounded, color: Colors.green, size: 20),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('$fromName → $toName', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF2D3142))),
+                        const SizedBox(height: 4),
+                        Text(
+                          DateFormat('dd MMM yyyy').format(DateTime.tryParse(s.date) ?? DateTime.now()),
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    CurrencyFormatter.format(s.amount, currency: widget.group.currency),
+                    style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                ],
               ),
             );
           }),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
       ],
     );
   }

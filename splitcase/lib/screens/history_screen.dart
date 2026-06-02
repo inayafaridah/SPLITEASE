@@ -49,112 +49,169 @@ class _HistoryScreenState extends State<HistoryScreen> {
         displayedSettlements.fold(0.0, (sum, item) => sum + item.amount);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-        title: const Text('Riwayat Pembayaran', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
-      body: sp.loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: DropdownButtonFormField<int?>(
-                    key: ValueKey('filter_${gp.groups.length}_${gp.groups.map((g) => g.id).join(',')}'),
-                    value: _filterGroupId,
-                    decoration: InputDecoration(
-                      labelText: 'Filter Berdasarkan Grup',
-                      filled: true,
-                      fillColor: Colors.white,
-                      isDense: true,
-                      prefixIcon: const Icon(Icons.filter_list_rounded, color: Colors.indigo),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-                    ),
-                    items: [
-                      const DropdownMenuItem<int?>(value: null, child: Text('Semua Grup')),
-                      ...gp.groups.map((g) => DropdownMenuItem<int?>(value: g.id, child: Text(g.name))),
-                    ],
-                    onChanged: (v) => setState(() => _filterGroupId = v),
+      backgroundColor: const Color(0xFFF4F6F9),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 180,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: const Color(0xFF4A00E0),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-                if (displayedSettlements.isEmpty)
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.history_toggle_off_rounded, size: 64, color: Colors.grey.shade400),
-                          const SizedBox(height: 12),
-                          Text('Belum ada riwayat pembayaran', style: TextStyle(color: Colors.grey.shade600, fontSize: 15)),
-                        ],
-                      ),
-                    ),
-                  )
-                else ...[
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ), // Di sini komponen bordernya sudah dibuang sepenuhnya agar aman 100%
-                    child: Row(
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 70,
-                              height: 70,
-                              child: CircularProgressIndicator(
-                                value: totalSettled > 0 ? 1.0 : 0.0,
-                                strokeWidth: 6,
-                                backgroundColor: Colors.grey.shade100,
-                                valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-                              ),
-                            ),
-                            const Icon(Icons.assignment_turned_in_rounded, size: 32, color: Colors.green),
-                          ],
-                        ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Total Dana Selesai Dibayar',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
-                              const SizedBox(height: 4),
-                              Text('Rp ${totalSettled.toStringAsFixed(0)}',
-                                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green)),
-                              Text('Berdasarkan ${displayedSettlements.length} data pelunasan',
-                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
-                            ],
+                        const Text(
+                          'Riwayat Pelunasan',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${displayedSettlements.length} transaksi pelunasan selesai',
+                          style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 15, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                    child: Align(alignment: Alignment.centerLeft, child: Text('Daftar Pelunasan', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))),
-                  ),
-                  Expanded(child: _buildList(context, displayedSettlements)),
-                ],
-              ],
+                ),
+              ),
             ),
+          ),
+          SliverToBoxAdapter(
+            child: sp.loading
+                ? const Padding(
+                    padding: EdgeInsets.all(40),
+                    child: Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0))),
+                  )
+                : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                            ],
+                          ),
+                          child: DropdownButtonFormField<int?>(
+                            key: ValueKey('filter_${gp.groups.length}_${gp.groups.map((g) => g.id).join(',')}'),
+                            value: _filterGroupId,
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4A00E0)),
+                            decoration: InputDecoration(
+                              labelText: 'Filter Grup',
+                              labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                              filled: true,
+                              fillColor: Colors.transparent,
+                              isDense: true,
+                              prefixIcon: const Icon(Icons.filter_list_rounded, color: Color(0xFF4A00E0)),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                            ),
+                            items: [
+                              const DropdownMenuItem<int?>(value: null, child: Text('Semua Grup', style: TextStyle(fontWeight: FontWeight.w600))),
+                              ...gp.groups.map((g) => DropdownMenuItem<int?>(value: g.id, child: Text(g.name, style: const TextStyle(fontWeight: FontWeight.w500)))),
+                            ],
+                            onChanged: (v) => setState(() => _filterGroupId = v),
+                          ),
+                        ),
+                      ),
+                      if (displayedSettlements.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 40),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(32),
+                                  decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.05), shape: BoxShape.circle),
+                                  child: const Icon(Icons.history_toggle_off_rounded, size: 80, color: Color(0xFF4A00E0)),
+                                ),
+                                const SizedBox(height: 32),
+                                const Text('Belum ada pelunasan', style: TextStyle(color: Color(0xFF2D3142), fontSize: 22, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 12),
+                                Text('Riwayat pembayaranmu akan\nmuncul di sini.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600, fontSize: 15, height: 1.5)),
+                              ],
+                            ),
+                          ),
+                        )
+                      else ...[
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.green.shade50, Colors.green.shade100],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                child: const Icon(Icons.assignment_turned_in_rounded, size: 32, color: Colors.green),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Total Dana Lunas', style: TextStyle(fontSize: 13, color: Colors.green.shade800, fontWeight: FontWeight.w600)),
+                                    const SizedBox(height: 8),
+                                    Text('Rp ${totalSettled.toStringAsFixed(0)}', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green.shade700, letterSpacing: -0.5)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
+                          child: Align(alignment: Alignment.centerLeft, child: Text('Daftar Pelunasan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142)))),
+                        ),
+                        _buildList(context, displayedSettlements),
+                        const SizedBox(height: 80),
+                      ],
+                    ],
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.indigo,
+        backgroundColor: const Color(0xFF4A00E0),
         foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const SettleScreen()),
         ).then((_) => context.read<SettlementProvider>().loadAll()),
-        icon: const Icon(Icons.post_add_rounded),
-        label: const Text('Catat Baru', style: TextStyle(fontWeight: FontWeight.bold)),
+        icon: const Icon(Icons.post_add_rounded, size: 24),
+        label: const Text('Catat Baru', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
       ),
     );
   }
@@ -165,8 +222,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final gp = context.read<GroupProvider>();
 
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: settlements.length,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       itemBuilder: (context, index) {
         final s = settlements[index];
 
@@ -187,33 +246,50 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 .firstWhere((_) => true, orElse: () => 'Grup dihapus')
             : '';
 
-        return Card(
-          elevation: 0,
-          margin: const EdgeInsets.only(bottom: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-          color: Colors.white,
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            leading: CircleAvatar(
-              backgroundColor: Colors.green.shade50,
-              child: const Icon(Icons.check_rounded, color: Colors.green),
-            ),
-            title: Text('$fromName ➔ $toName', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 2),
-                Text('Jumlah: Rp ${s.amount.toStringAsFixed(0)}', style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
-                if (groupName.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text('Grup: $groupName', style: TextStyle(fontSize: 11, color: Colors.indigo.shade400, fontWeight: FontWeight.w500)),
-                  ),
-              ],
-            ),
-            trailing: IconButton(
-              icon: Icon(Icons.more_vert_rounded, color: Colors.grey.shade500),
-              onPressed: () => _settlementOptions(context, s, sp),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => _settlementOptions(context, s, sp),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
+                      child: const Icon(Icons.check_rounded, color: Colors.green, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$fromName ➔ $toName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142))),
+                          const SizedBox(height: 6),
+                          Text('Rp ${s.amount.toStringAsFixed(0)}', style: const TextStyle(color: Colors.green, fontSize: 15, fontWeight: FontWeight.bold)),
+                          if (groupName.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                              child: Text(groupName, style: const TextStyle(fontSize: 11, color: Color(0xFF4A00E0), fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.more_vert_rounded, color: Colors.grey.shade400),
+                  ],
+                ),
+              ),
             ),
           ),
         );
