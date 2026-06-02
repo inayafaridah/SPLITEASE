@@ -297,20 +297,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4A00E0).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Text(
-                          payerName.isNotEmpty ? payerName[0].toUpperCase() : '?',
-                          style: const TextStyle(color: Color(0xFF4A00E0), fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                      ),
-                    ),
+                    _buildTransactionIcon(tx.description),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -506,6 +493,91 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
         ],
         const SizedBox(height: 32),
       ],
+    );
+  }
+
+  Widget _buildTransactionIcon(String description) {
+    final descLower = description.toLowerCase();
+    String emoji = '🛍️'; // Default belanja
+    Color bgGradientStart = const Color(0xFF4A00E0);
+    Color bgGradientEnd = const Color(0xFF8E2DE2);
+
+    if (descLower.contains('makan') || 
+        descLower.contains('ramen') || 
+        descLower.contains('kopi') || 
+        descLower.contains('cafe') || 
+        descLower.contains('dinner') || 
+        descLower.contains('lunch') || 
+        descLower.contains('pizza') ||
+        descLower.contains('kuliner') ||
+        descLower.contains('food')) {
+      emoji = '🍜';
+      bgGradientStart = const Color(0xFFFF5F6D);
+      bgGradientEnd = const Color(0xFFFFC371);
+    } else if (descLower.contains('bensin') || 
+               descLower.contains('grab') || 
+               descLower.contains('gojek') || 
+               descLower.contains('taxi') || 
+               descLower.contains('parkir') || 
+               descLower.contains('tol') ||
+               descLower.contains('car') ||
+               descLower.contains('motor')) {
+      emoji = '🚗';
+      bgGradientStart = const Color(0xFF2193b0);
+      bgGradientEnd = const Color(0xFF6dd5ed);
+    } else if (descLower.contains('tiket') || 
+               descLower.contains('hotel') || 
+               descLower.contains('penginapan') || 
+               descLower.contains('villa') ||
+               descLower.contains('staycation')) {
+      emoji = '🏨';
+      bgGradientStart = const Color(0xFF11998e);
+      bgGradientEnd = const Color(0xFF38ef7d);
+    } else if (descLower.contains('netflix') || 
+               descLower.contains('nonton') || 
+               descLower.contains('game') || 
+               descLower.contains('spotify') ||
+               descLower.contains('bioskop') ||
+               descLower.contains('cinema') ||
+               descLower.contains('karoke')) {
+      emoji = '🎬';
+      bgGradientStart = const Color(0xFF833ab4);
+      bgGradientEnd = const Color(0xFFfd1d1d);
+    } else if (descLower.contains('belanja') ||
+               descLower.contains('shop') ||
+               descLower.contains('baju') ||
+               descLower.contains('supermarket') ||
+               descLower.contains('indomaret') ||
+               descLower.contains('alfamart')) {
+      emoji = '🛍️';
+      bgGradientStart = const Color(0xFFec008c);
+      bgGradientEnd = const Color(0xFFfc6767);
+    }
+
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [bgGradientStart, bgGradientEnd],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: bgGradientStart.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          emoji,
+          style: const TextStyle(fontSize: 22),
+        ),
+      ),
     );
   }
 }

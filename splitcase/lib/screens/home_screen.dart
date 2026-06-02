@@ -20,13 +20,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String _userName = 'Pengguna';
+
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<GroupProvider>().loadAll();
       context.read<ContactProvider>().loadAll();
     });
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = PreferencesService();
+    final name = await prefs.getUserName();
+    if (name.isNotEmpty && mounted) {
+      setState(() {
+        _userName = name;
+      });
+    }
   }
 
   Future<int?> _ensureCreatorContact() async {
@@ -421,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              'Splitage',
+                              'SplitEase',
                               style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -472,18 +485,37 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.all(40),
                     child: Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0))),
                   )
-                : gp.groups.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: gp.groups.length,
-                        itemBuilder: (ctx, i) {
-                          final group = gp.groups[i];
-                          return _buildGroupCard(context, group);
-                        },
-                      ),
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDashboardCard(context),
+                      if (gp.groups.isEmpty)
+                        _buildEmptyState()
+                      else ...[
+                        const Padding(
+                          padding: EdgeInsets.only(left: 24, top: 24, bottom: 4),
+                          child: Text(
+                            'Grup Patunganmu',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2D3142),
+                            ),
+                          ),
+                        ),
+                        ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: gp.groups.length,
+                          itemBuilder: (ctx, i) {
+                            final group = gp.groups[i];
+                            return _buildGroupCard(context, group);
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
           ),
         ],
       ),
@@ -576,28 +608,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: Text(
-                      group.name[0].toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
-                    ),
-                  ),
-                ),
+                _buildGroupIcon(group.name),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -643,6 +654,264 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupIcon(String groupName) {
+    final nameLower = groupName.toLowerCase();
+    String emoji = '👥';
+    Color startColor = const Color(0xFF4A00E0);
+    Color endColor = const Color(0xFF8E2DE2);
+
+    if (nameLower.contains('makan') || 
+        nameLower.contains('dinner') || 
+        nameLower.contains('lunch') || 
+        nameLower.contains('cafe') || 
+        nameLower.contains('kuliner') || 
+        nameLower.contains('ramen') || 
+        nameLower.contains('food') || 
+        nameLower.contains('kopi') ||
+        nameLower.contains('coffee')) {
+      emoji = '🍜';
+      startColor = const Color(0xFFFF5F6D);
+      endColor = const Color(0xFFFFC371);
+    } else if (nameLower.contains('libur') || 
+               nameLower.contains('trip') || 
+               nameLower.contains('bali') || 
+               nameLower.contains('jalan') || 
+               nameLower.contains('travel') || 
+               nameLower.contains('wisata')) {
+      emoji = '✈️';
+      startColor = const Color(0xFF2193b0);
+      endColor = const Color(0xFF6dd5ed);
+    } else if (nameLower.contains('kost') || 
+               nameLower.contains('kontrakan') || 
+               nameLower.contains('rumah') || 
+               nameLower.contains('home') || 
+               nameLower.contains('rent') ||
+               nameLower.contains('apart')) {
+      emoji = '🏠';
+      startColor = const Color(0xFF11998e);
+      endColor = const Color(0xFF38ef7d);
+    } else if (nameLower.contains('nonton') || 
+               nameLower.contains('game') || 
+               nameLower.contains('bioskop') || 
+               nameLower.contains('cinema') || 
+               nameLower.contains('play') ||
+               nameLower.contains('fun')) {
+      emoji = '🎮';
+      startColor = const Color(0xFF833ab4);
+      endColor = const Color(0xFFfd1d1d);
+    } else if (nameLower.contains('belanja') || 
+               nameLower.contains('shop') || 
+               nameLower.contains('mall') || 
+               nameLower.contains('kado') || 
+               nameLower.contains('gift')) {
+      emoji = '🛍️';
+      startColor = const Color(0xFFec008c);
+      endColor = const Color(0xFFfc6767);
+    }
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [startColor, endColor],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: startColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          emoji,
+          style: const TextStyle(
+            fontSize: 26,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDashboardCard(BuildContext context) {
+    final gp = context.watch<GroupProvider>();
+    final cp = context.watch<ContactProvider>();
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4A00E0).withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -20,
+              top: -20,
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.white.withOpacity(0.08),
+              ),
+            ),
+            Positioned(
+              left: -30,
+              bottom: -30,
+              child: CircleAvatar(
+                radius: 80,
+                backgroundColor: Colors.white.withOpacity(0.05),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.face_retouching_natural_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Halo, $_userName! 👋',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const Text(
+                              'Selamat datang di SplitEase',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Divider(color: Colors.white24, height: 1),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Total Grup',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.group_work_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${gp.groups.length}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 40,
+                        width: 1,
+                        color: Colors.white24,
+                      ),
+                      const SizedBox(width: 24),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Total Kontak',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.contacts_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${cp.contacts.length}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
