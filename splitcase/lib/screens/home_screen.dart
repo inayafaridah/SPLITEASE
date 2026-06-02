@@ -10,6 +10,7 @@ import '../providers/group_member_provider.dart';
 import '../services/preferences_service.dart';
 import 'group_detail_screen.dart';
 import 'add_contact_screen.dart';
+import 'settings_screen.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,9 +36,17 @@ class _HomeScreenState extends State<HomeScreen> {
     if (myName.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('\u26A0\uFE0F Nama kamu belum diset. Isi nama di halaman Pengaturan agar ikut masuk grup.'),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(child: Text('Nama belum diatur! Isi di halaman Pengaturan dahulu.')),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.amber.shade800,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -74,7 +83,14 @@ class _HomeScreenState extends State<HomeScreen> {
             final cp = context.read<ContactProvider>();
             return StatefulBuilder(builder: (ctx, setLocal) {
               return AlertDialog(
-                title: const Text('Buat Grup Baru'),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                title: const Row(
+                  children: [
+                    Icon(Icons.group_add_rounded, color: Colors.indigo),
+                    SizedBox(width: 10),
+                    Text('Buat Grup Baru', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
                 content: SizedBox(
                   width: double.maxFinite,
                   child: SingleChildScrollView(
@@ -82,29 +98,54 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 8),
                         TextField(
                           controller: nameCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: 'Nama Grup',
-                            hintText: 'Dinner Fancy Bali',
-                            border: OutlineInputBorder(),
+                            hintText: 'e.g., Dinner Fancy Bali',
+                            prefixIcon: const Icon(Icons.edit_road_rounded),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: currency,
-                          decoration: const InputDecoration(labelText: 'Mata Uang', border: OutlineInputBorder()),
+                          decoration: InputDecoration(
+                            labelText: 'Mata Uang',
+                            prefixIcon: const Icon(Icons.payments_outlined),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
                           items: ['IDR', 'USD', 'EUR'].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                           onChanged: (v) => setLocal(() => currency = v ?? 'IDR'),
                         ),
-                        const SizedBox(height: 16),
-                        const Text('Pilih Anggota Tambahan', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 20),
+                        const Text('Pilih Anggota Tambahan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                         const SizedBox(height: 4),
-                        const Text('Kamu (creator) otomatis masuk sebagai anggota.',
-                            style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        const SizedBox(height: 8),
+                        Text('Kamu (creator) otomatis masuk sebagai anggota.',
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                        const SizedBox(height: 12),
                         cp.contacts.isEmpty
-                            ? const Text('Tambah kontak terlebih dahulu')
+                            ? Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Tambah kontak terlebih dahulu', style: TextStyle(color: Colors.orange)),
+                                  ],
+                                ),
+                              )
                             : Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
@@ -113,6 +154,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                   return FilterChip(
                                     label: Text(c.name),
                                     selected: isSel,
+                                    selectedColor: Colors.indigo.shade100,
+                                    checkmarkColor: Colors.indigo,
+                                    labelStyle: TextStyle(
+                                      color: isSel ? Colors.indigo.shade900 : Colors.black87,
+                                      fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     onSelected: (sel) {
                                       final next = List<int>.from(selected);
                                       sel ? next.add(c.id!) : next.remove(c.id);
@@ -126,13 +174,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Batal')),
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: Text('Batal', style: TextStyle(color: Colors.grey.shade600)),
+                  ),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                     onPressed: () async {
                       final name = nameCtrl.text.trim();
                       if (name.isEmpty) {
-                        ScaffoldMessenger.of(dialogContext)
-                            .showSnackBar(const SnackBar(content: Text('Nama grup tidak boleh kosong')));
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(content: Text('Nama grup tidak boleh kosong'), behavior: SnackBarBehavior.floating),
+                        );
                         return;
                       }
                       Navigator.pop(dialogContext);
@@ -147,7 +204,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         }.toList();
                         if (allMemberIds.isNotEmpty) await gmp.addMembers(groupId, allMemberIds);
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Grup berhasil dibuat \u2713')));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Grup berhasil dibuat 🎉'), behavior: SnackBarBehavior.floating),
+                          );
                           gp.loadAll();
                         }
                       } catch (e) {
@@ -185,7 +244,14 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (_, selected, __) {
             return StatefulBuilder(builder: (ctx, setLocal) {
               return AlertDialog(
-                title: const Text('Edit Grup'),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                title: const Row(
+                  children: [
+                    Icon(Icons.edit_rounded, color: Colors.indigo),
+                    SizedBox(width: 10),
+                    Text('Edit Data Grup', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
                 content: SizedBox(
                   width: double.maxFinite,
                   child: SingleChildScrollView(
@@ -193,20 +259,33 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 8),
                         TextField(
                           controller: nameCtrl,
-                          decoration: const InputDecoration(labelText: 'Nama Grup', border: OutlineInputBorder()),
+                          decoration: InputDecoration(
+                            labelText: 'Nama Grup',
+                            prefixIcon: const Icon(Icons.edit),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: currency,
-                          decoration: const InputDecoration(labelText: 'Mata Uang', border: OutlineInputBorder()),
+                          decoration: InputDecoration(
+                            labelText: 'Mata Uang',
+                            prefixIcon: const Icon(Icons.payments_outlined),
+                            filled: true,
+                            fillColor: Colors.grey.shade50,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
                           items: ['IDR', 'USD', 'EUR'].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                           onChanged: (v) => setLocal(() => currency = v ?? 'IDR'),
                         ),
-                        const SizedBox(height: 16),
-                        const Text('Anggota Grup', style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 20),
+                        const Text('Anggota Grup', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        const SizedBox(height: 12),
                         cp.contacts.isEmpty
                             ? const Text('Belum ada kontak.')
                             : Wrap(
@@ -217,6 +296,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   return FilterChip(
                                     label: Text(c.name),
                                     selected: isSel,
+                                    selectedColor: Colors.indigo.shade100,
+                                    checkmarkColor: Colors.indigo,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     onSelected: (sel) {
                                       final next = List<int>.from(selected);
                                       sel ? next.add(c.id!) : next.remove(c.id);
@@ -230,13 +312,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Batal')),
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: Text('Batal', style: TextStyle(color: Colors.grey.shade600)),
+                  ),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                     onPressed: () async {
                       final newName = nameCtrl.text.trim();
                       if (newName.isEmpty) {
-                        ScaffoldMessenger.of(dialogContext)
-                            .showSnackBar(const SnackBar(content: Text('Nama grup tidak boleh kosong')));
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(content: Text('Nama grup tidak boleh kosong'), behavior: SnackBarBehavior.floating),
+                        );
                         return;
                       }
                       Navigator.pop(dialogContext);
@@ -245,8 +336,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         await gp.rename(group.id!, newName, currency: currency);
                         await gmp.replaceMembers(group.id!, selectedIds.value);
                         if (mounted) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(content: Text('Grup berhasil diupdate \u2713')));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Grup berhasil di-update ✓'), behavior: SnackBarBehavior.floating),
+                          );
                           gp.loadAll();
                         }
                       } catch (e) {
@@ -268,12 +360,22 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Grup?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_forever, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Hapus Grup?'),
+          ],
+        ),
         content: Text('Semua transaksi dan data di "${group.name}" akan dihapus permanen.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Batal', style: TextStyle(color: Colors.grey.shade600))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () async {
               final gp = context.read<GroupProvider>();
               await gp.remove(group.id!);
@@ -291,57 +393,103 @@ class _HomeScreenState extends State<HomeScreen> {
     final gp = context.watch<GroupProvider>();
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Splitage'),
+        elevation: 0,
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+        title: const Text('Splitage', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.people),
+            icon: const Icon(Icons.people_alt_outlined),
+            tooltip: 'Kelola Kontak',
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddContactScreen()))
                 .then((_) => context.read<ContactProvider>().loadAll()),
           ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Pengaturan',
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: gp.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
           : gp.groups.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.group_outlined, size: 80, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('Belum ada grup', style: TextStyle(fontSize: 18)),
-                      Text('Buat grup untuk mulai split tagihan', style: TextStyle(color: Colors.grey)),
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(color: Colors.indigo.shade50, shape: BoxShape.circle),
+                        child: const Icon(Icons.group_outlined, size: 80, color: Colors.indigo),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text('Belum ada grup', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+                      const SizedBox(height: 8),
+                      Text('Buat grup untuk mulai split tagihan', style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
                     ],
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   itemCount: gp.groups.length,
                   itemBuilder: (ctx, i) {
                     final group = gp.groups[i];
                     return Card(
+                      elevation: 0,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      color: Colors.white,
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          child: Text(group.name[0].toUpperCase(), style: const TextStyle(color: Colors.white)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        leading: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.indigo.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Text(
+                              group.name[0].toUpperCase(),
+                              style: const TextStyle(color: Colors.indigo, fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                          ),
                         ),
-                        title: Text(group.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text(DateFormat('dd MMM yyyy').format(DateTime.parse(group.createdAt))),
+                        title: Text(group.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Row(
+                            children: [
+                              Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade500),
+                              const SizedBox(width: 4),
+                              Text(
+                                DateFormat('dd MMM yyyy').format(DateTime.parse(group.createdAt)),
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 20),
+                              icon: Icon(Icons.edit_outlined, size: 20, color: Colors.grey.shade600),
                               tooltip: 'Edit Grup',
                               onPressed: () => _showEditGroupDialog(context, group),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                              icon: Icon(Icons.delete_outline, size: 20, color: Colors.red.shade400),
                               tooltip: 'Hapus Grup',
                               onPressed: () => _confirmDelete(context, group),
                             ),
-                            const Icon(Icons.chevron_right),
+                            Icon(Icons.chevron_right, color: Colors.grey.shade400),
                           ],
                         ),
                         onTap: () => Navigator.push(
@@ -353,9 +501,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+        elevation: 4,
         onPressed: () => _showAddGroupDialog(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Grup Baru'),
+        icon: const Icon(Icons.add, size: 22),
+        label: const Text('Grup Baru', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3)),
       ),
     );
   }

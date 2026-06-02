@@ -124,15 +124,15 @@ class _SettleScreenState extends State<SettleScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_groupId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih grup terlebih dahulu')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih grup terlebih dahulu'), behavior: SnackBarBehavior.floating));
       return;
     }
     if (_fromId == null || _toId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih pembayar dan penerima')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pilih pembayar dan penerima'), behavior: SnackBarBehavior.floating));
       return;
     }
     if (_fromId == _toId) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pembayar dan penerima harus berbeda')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pembayar dan penerima harus berbeda'), behavior: SnackBarBehavior.floating));
       return;
     }
 
@@ -165,110 +165,171 @@ class _SettleScreenState extends State<SettleScreen> {
     final contactsToShow = _groupId != null && _groupContacts.isNotEmpty ? _groupContacts : <Contact>[];
 
     return Scaffold(
-      appBar: AppBar(title: Text(isEdit ? 'Edit Pelunasan' : 'Catat Pelunasan')),
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+        title: Text(isEdit ? 'Edit Transaksi Pelunasan' : 'Catat Pelunasan', style: const TextStyle(fontWeight: FontWeight.bold)),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           children: [
-            DropdownButtonFormField<int?>(
-              value: _groupId,
-              decoration: const InputDecoration(
-                labelText: 'Pilih Grup',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.group),
-              ),
-              hint: const Text('-- Pilih Grup --'),
-              items: gp.groups.map((g) => DropdownMenuItem<int?>(value: g.id, child: Text(g.name))).toList(),
-              onChanged: (v) async {
-                setState(() => _groupId = v);
-                if (v != null) await _loadGroupMembers(v);
-              },
-              validator: (v) => v == null ? 'Wajib pilih grup' : null,
-            ),
-            const SizedBox(height: 16),
-
-            if (_loadingMembers)
-              const Center(child: CircularProgressIndicator())
-            else if (_groupId == null)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('Pilih grup dulu untuk melihat anggota.', style: TextStyle(color: Colors.grey)),
-              )
-            else if (contactsToShow.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('Grup ini belum punya anggota.', style: TextStyle(color: Colors.orange)),
-              )
-            else ...[
-              DropdownButtonFormField<int>(
-                value: _fromId,
-                decoration: const InputDecoration(
-                  labelText: 'Dari (Yang Membayar)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person_outline),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.group_work_rounded, color: Colors.indigo, size: 20),
+                        SizedBox(width: 8),
+                        Text('Pilih Lingkup Grup', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<int?>(
+                      value: _groupId,
+                      decoration: InputDecoration(
+                        labelText: 'Pilih Grup Utama',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        prefixIcon: const Icon(Icons.group_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      hint: const Text('-- Pilih Grup --'),
+                      items: gp.groups.map((g) => DropdownMenuItem<int?>(value: g.id, child: Text(g.name))).toList(),
+                      onChanged: (v) async {
+                        setState(() => _groupId = v);
+                        if (v != null) await _loadGroupMembers(v);
+                      },
+                      validator: (v) => v == null ? 'Wajib pilih grup' : null,
+                    ),
+                  ],
                 ),
-                hint: const Text('-- Pilih Pembayar --'),
-                items: contactsToShow.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                onChanged: (v) => setState(() => _fromId = v),
-                validator: (v) => v == null ? 'Wajib diisi' : null,
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<int>(
-                value: _toId,
-                decoration: const InputDecoration(
-                  labelText: 'Ke (Yang Menerima)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.swap_horizontal_circle_rounded, color: Colors.indigo, size: 20),
+                        SizedBox(width: 8),
+                        Text('Alur Transaksi & Nominal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    if (_loadingMembers)
+                      Center(child: Padding(padding: const EdgeInsets.all(16.0), child: CircularProgressIndicator(color: Theme.of(context).primaryColor)))
+                    else if (_groupId == null)
+                      Text('Silakan tentukan grup terlebih dahulu.', style: TextStyle(color: Colors.grey.shade500, fontSize: 13))
+                    else if (contactsToShow.isEmpty)
+                      const Text('Grup pilihan belum memiliki data anggota.', style: TextStyle(color: Colors.orange, fontSize: 13))
+                    else ...[
+                      DropdownButtonFormField<int>(
+                        value: _fromId,
+                        decoration: InputDecoration(
+                          labelText: 'Dari (Yang Membayar)',
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          prefixIcon: const Icon(Icons.person_remove_outlined),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        hint: const Text('-- Pilih Pembayar --'),
+                        items: contactsToShow.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+                        onChanged: (v) => setState(() => _fromId = v),
+                        validator: (v) => v == null ? 'Wajib diisi' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<int>(
+                        value: _toId,
+                        decoration: InputDecoration(
+                          labelText: 'Ke (Yang Menerima)',
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          prefixIcon: const Icon(Icons.person_add_alt_1_outlined),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        hint: const Text('-- Pilih Penerima --'),
+                        items: contactsToShow.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+                        onChanged: (v) => setState(() => _toId = v),
+                        validator: (v) => v == null ? 'Wajib diisi' : null,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    TextFormField(
+                      controller: _amountCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Total Dana Pelunasan',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        prefixIcon: const Icon(Icons.price_check_rounded),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (v) =>
+                          (v == null || double.tryParse(v) == null || double.parse(v) <= 0) ? 'Masukkan jumlah nominal valid' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _noteCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Catatan Pendukung (opsional)',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      maxLines: 2,
+                    ),
+                  ],
                 ),
-                hint: const Text('-- Pilih Penerima --'),
-                items: contactsToShow.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-                onChanged: (v) => setState(() => _toId = v),
-                validator: (v) => v == null ? 'Wajib diisi' : null,
               ),
-              const SizedBox(height: 16),
-            ],
-
-            TextFormField(
-              controller: _amountCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Jumlah',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.attach_money),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade200)),
+              color: Colors.white,
+              child: ListTile(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                leading: CircleAvatar(
+                  backgroundColor: Colors.indigo.withOpacity(0.1), 
+                  child: const Icon(Icons.calendar_month_rounded, color: Colors.indigo)
+                ),
+                title: const Text('Tanggal Penyelesaian', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                subtitle: Text(DateFormat('dd MMMM yyyy').format(_date), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                trailing: const Icon(Icons.edit_calendar_rounded, color: Colors.indigo),
+                onTap: _pickDate,
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator: (v) =>
-                  (v == null || double.tryParse(v) == null || double.parse(v) <= 0) ? 'Masukkan jumlah valid' : null,
             ),
-            const SizedBox(height: 16),
-
-            TextFormField(
-              controller: _noteCtrl,
-              decoration: const InputDecoration(labelText: 'Catatan (opsional)', border: OutlineInputBorder()),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-
-            ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Colors.grey),
-              ),
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Tanggal'),
-              subtitle: Text(DateFormat('dd MMMM yyyy').format(_date)),
-              onTap: _pickDate,
-            ),
-            const SizedBox(height: 24),
-
+            const SizedBox(height: 28),
             ElevatedButton.icon(
               onPressed: _submitting ? null : _submit,
               icon: _submitting
-                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.save),
-              label: Text(isEdit ? 'Simpan Perubahan' : 'Catat Pelunasan'),
-              style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.done_all_rounded),
+              label: Text(isEdit ? 'Simpan Perubahan' : 'Selesaikan Pembayaran', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
             ),
           ],
         ),
