@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/group.dart';
 import '../models/transaction.dart';
 import '../models/contact.dart';
@@ -454,39 +455,48 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             final toName = cp.nameById(s.toContactId);
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.shade100),
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.check_rounded, color: Colors.green, size: 20),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => _showReceiptDialog(context, s),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
                       children: [
-                        Text('$fromName → $toName', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF2D3142))),
-                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
+                          child: const Icon(Icons.check_rounded, color: Colors.green, size: 20),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('$fromName → $toName', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF2D3142))),
+                              const SizedBox(height: 4),
+                              Text(
+                                DateFormat('dd MMM yyyy').format(DateTime.tryParse(s.date) ?? DateTime.now()),
+                                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                              ),
+                            ],
+                          ),
+                        ),
                         Text(
-                          DateFormat('dd MMM yyyy').format(DateTime.tryParse(s.date) ?? DateTime.now()),
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                          CurrencyFormatter.format(s.amount, currency: widget.group.currency),
+                          style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 15),
                         ),
                       ],
                     ),
                   ),
-                  Text(
-                    CurrencyFormatter.format(s.amount, currency: widget.group.currency),
-                    style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ],
+                ),
               ),
             );
           }),
@@ -578,6 +588,287 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           style: const TextStyle(fontSize: 22),
         ),
       ),
+    );
+  }
+
+  Color _parseColor(String? hex) {
+    if (hex == null || hex.isEmpty) return Colors.indigo;
+    try {
+      return Color(int.parse(hex.replaceFirst('#', '0xFF')));
+    } catch (_) {
+      return Colors.indigo;
+    }
+  }
+
+  void _showReceiptDialog(BuildContext context, Settlement s) {
+    final cp = context.read<ContactProvider>();
+    final fromContact = cp.contacts.firstWhere(
+      (c) => c.id == s.fromContactId,
+      orElse: () => Contact(name: cp.nameById(s.fromContactId), phone: '', avatarColor: '#607D8B'),
+    );
+    final toContact = cp.contacts.firstWhere(
+      (c) => c.id == s.toContactId,
+      orElse: () => Contact(name: cp.nameById(s.toContactId), phone: '', avatarColor: '#607D8B'),
+    );
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        final dateStr = DateFormat('dd MMMM yyyy, HH:mm').format(DateTime.tryParse(s.date) ?? DateTime.now());
+        final sltId = 'SPT-${1000 + (s.id ?? 0)}';
+
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          contentPadding: EdgeInsets.zero,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          content: Container(
+            width: double.maxFinite,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 25,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Green Success Header
+                  Container(
+                    width: double.maxFinite,
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF11998e),
+                            size: 40,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'PELUNASAN BERHASIL',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          CurrencyFormatter.format(s.amount, currency: widget.group.currency),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Receipt Body
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Flow
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Debtor
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: _parseColor(fromContact.avatarColor),
+                                    child: Text(
+                                      fromContact.initials,
+                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    fromContact.name,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const Text('Pengirim', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                                ],
+                              ),
+                            ),
+                            
+                            // Arrow
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Icon(Icons.arrow_forward_rounded, color: Colors.grey, size: 20),
+                            ),
+
+                            // Creditor
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: _parseColor(toContact.avatarColor),
+                                    child: Text(
+                                      toContact.initials,
+                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    toContact.name,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const Text('Penerima', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+                        _buildDashedDivider(),
+                        const SizedBox(height: 20),
+
+                        // Detail fields
+                        _buildReceiptDetailRow('No. Referensi', sltId),
+                        const SizedBox(height: 12),
+                        _buildReceiptDetailRow('Waktu Transaksi', dateStr),
+                        const SizedBox(height: 12),
+                        _buildReceiptDetailRow('Nama Grup', widget.group.name),
+                        if (s.note.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          _buildReceiptDetailRow('Catatan', s.note),
+                        ],
+
+                        const SizedBox(height: 24),
+
+                        // Share / Close actions
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                onPressed: () => Navigator.pop(dialogContext),
+                                child: Text(
+                                  'Tutup',
+                                  style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  backgroundColor: const Color(0xFF4A00E0),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                onPressed: () {
+                                  final shareTxt = 
+                                      '=== BUKTI TRANSFER SPLITEASE ===\n'
+                                      'No. Ref: $sltId\n'
+                                      'Grup: ${widget.group.name}\n'
+                                      'Pengirim: ${fromContact.name}\n'
+                                      'Penerima: ${toContact.name}\n'
+                                      'Nominal: Rp ${NumberFormat('#,###', 'id_ID').format(s.amount)}\n'
+                                      'Tanggal: $dateStr\n'
+                                      '${s.note.isNotEmpty ? "Catatan: ${s.note}\n" : ""}'
+                                      '-----------------------------\n'
+                                      'Patungan praktis dengan Splitase!';
+                                  Share.share(shareTxt);
+                                },
+                                icon: const Icon(Icons.share_rounded, size: 18),
+                                label: const Text(
+                                  'Bagikan',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDashedDivider() {
+    return Row(
+      children: List.generate(
+        15,
+        (index) => Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            height: 1,
+            color: Colors.grey.shade300,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReceiptDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: const TextStyle(color: Color(0xFF2D3142), fontSize: 13, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
     );
   }
 }
