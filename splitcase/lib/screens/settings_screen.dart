@@ -1,6 +1,9 @@
-// screens/settings_screen.dart — Orang 1 (SharedPreferences: nama & mata uang)
+// screens/settings_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/preferences_service.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/custom_gradient_button.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,6 +16,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _prefs = PreferencesService();
   final _nameCtrl = TextEditingController();
   String _currency = 'IDR';
+  String _theme = 'purple'; // Menampung state tema sementara sebelum disimpan
   bool _loading = true;
 
   @override
@@ -24,9 +28,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _load() async {
     final name = await _prefs.getUserName();
     final currency = await _prefs.getDefaultCurrency();
+    
+    final theme = await _prefs.getColorTheme(); 
+    
     setState(() {
       _nameCtrl.text = name;
       _currency = currency;
+      _theme = theme; 
       _loading = false;
     });
   }
@@ -34,7 +42,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _save() async {
     await _prefs.setUserName(_nameCtrl.text.trim());
     await _prefs.setDefaultCurrency(_currency);
+    
     if (mounted) {
+      // Update global theme state
+      await context.read<ThemeProvider>().setTheme(_theme);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
@@ -64,9 +76,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_loading) {
       return const Scaffold(
         backgroundColor: Color(0xFFF4F6F9),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0))),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
+
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
@@ -77,13 +93,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: const Color(0xFF4A00E0),
+            backgroundColor: _primaryColor,
             iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                    colors: [_primaryColor, _gradientEndColor],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -117,6 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // CARD PROFIL
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -133,8 +150,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                              child: const Icon(Icons.person_rounded, color: Color(0xFF4A00E0), size: 22),
+                              decoration: BoxDecoration(color: _primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                              child: Icon(Icons.person_rounded, color: _primaryColor, size: 22),
                             ),
                             const SizedBox(width: 12),
                             const Text('Profil', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
@@ -145,20 +162,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           controller: _nameCtrl,
                           decoration: InputDecoration(
                             labelText: 'Nama Kamu',
-                            labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                            labelStyle: TextStyle(color: _primaryColor),
                             hintText: 'Masukkan namamu',
-                            prefixIcon: const Icon(Icons.badge_outlined, color: Color(0xFF4A00E0)),
+                            prefixIcon: Icon(Icons.badge_outlined, color: _primaryColor),
                             filled: true,
                             fillColor: const Color(0xFFF4F6F9),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
+                  
+                  // CARD PREFERENSI (Mata Uang & Tema Aplikasi)
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -175,46 +194,112 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                              child: const Icon(Icons.tune_rounded, color: Color(0xFF4A00E0), size: 22),
+                              decoration: BoxDecoration(color: _primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                              child: Icon(Icons.tune_rounded, color: _primaryColor, size: 22),
                             ),
                             const SizedBox(width: 12),
                             const Text('Preferensi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
                           ],
                         ),
                         const SizedBox(height: 20),
+                        
+                        // Dropdown Mata Uang
                         DropdownButtonFormField<String>(
                           value: _currency,
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4A00E0)),
+                          icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryColor),
                           decoration: InputDecoration(
                             labelText: 'Mata Uang Default',
-                            labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
-                            prefixIcon: const Icon(Icons.currency_exchange_rounded, color: Color(0xFF4A00E0)),
+                            labelStyle: TextStyle(color: _primaryColor),
+                            prefixIcon: Icon(Icons.currency_exchange_rounded, color: _primaryColor),
                             filled: true,
                             fillColor: const Color(0xFFF4F6F9),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                           ),
                           items: ['IDR', 'USD', 'EUR'].map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontWeight: FontWeight.w500)))).toList(),
                           onChanged: (v) => setState(() => _currency = v ?? 'IDR'),
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // Dropdown Tema Warna (Disinkronkan dengan value string)
+                        DropdownButtonFormField<String>(
+                          value: _theme,
+                          icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryColor),
+                          decoration: InputDecoration(
+                            labelText: 'Tema Warna Aplikasi',
+                            labelStyle: TextStyle(color: _primaryColor),
+                            prefixIcon: Icon(Icons.palette_rounded, color: _primaryColor),
+                            filled: true,
+                            fillColor: const Color(0xFFF4F6F9),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: 'purple',
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 16, height: 16,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)]),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text('Ungu', style: TextStyle(fontWeight: FontWeight.w500)),
+                                ],
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'blue',
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 16, height: 16,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(colors: [Colors.blue.shade700, Colors.blue.shade400]),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text('Biru', style: TextStyle(fontWeight: FontWeight.w500)),
+                                ],
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'green',
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 16, height: 16,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(colors: [Colors.green.shade700, Colors.green.shade400]),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text('Hijau', style: TextStyle(fontWeight: FontWeight.w500)),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onChanged: (v) => setState(() => _theme = v ?? 'purple'),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton.icon(
+                  
+                  CustomGradientButton(
                     onPressed: _save,
-                    icon: const Icon(Icons.save_rounded, size: 22),
-                    label: const Text('Simpan Pengaturan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4A00E0),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(56),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                      shadowColor: const Color(0xFF4A00E0).withOpacity(0.4),
-                    ),
+                    label: 'Simpan Pengaturan',
+                    icon: Icons.save_rounded,
+                    primaryColor: _primaryColor,
+                    gradientEndColor: _gradientEndColor,
                   ),
                   const SizedBox(height: 40),
                 ],

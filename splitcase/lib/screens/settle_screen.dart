@@ -9,6 +9,8 @@ import '../providers/settlement_provider.dart';
 import '../providers/contact_provider.dart';
 import '../providers/group_provider.dart';
 import '../providers/group_member_provider.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/custom_gradient_button.dart';
 
 class SettleScreen extends StatefulWidget {
   final Settlement? existing;
@@ -162,6 +164,9 @@ class _SettleScreenState extends State<SettleScreen> {
   @override
   Widget build(BuildContext context) {
     final gp = context.watch<GroupProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
     final contactsToShow = _groupId != null && _groupContacts.isNotEmpty ? _groupContacts : <Contact>[];
 
     return Scaffold(
@@ -185,7 +190,7 @@ class _SettleScreenState extends State<SettleScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
-            _buildTransferVisual(contactsToShow),
+            _buildTransferVisual(contactsToShow, _primaryColor, _gradientEndColor),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -202,8 +207,8 @@ class _SettleScreenState extends State<SettleScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                        child: const Icon(Icons.group_work_rounded, color: Color(0xFF4A00E0), size: 22),
+                        decoration: BoxDecoration(color: _primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                        child: Icon(Icons.group_work_rounded, color: _primaryColor, size: 22),
                       ),
                       const SizedBox(width: 12),
                       const Text('Pilih Lingkup Grup', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
@@ -212,16 +217,16 @@ class _SettleScreenState extends State<SettleScreen> {
                   const SizedBox(height: 24),
                   DropdownButtonFormField<int?>(
                     value: _groupId,
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4A00E0)),
+                    icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryColor),
                     decoration: InputDecoration(
                       labelText: 'Pilih Grup Utama',
-                      labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                      labelStyle: TextStyle(color: _primaryColor),
                       filled: true,
                       fillColor: const Color(0xFFF4F6F9),
-                      prefixIcon: const Icon(Icons.group_outlined, color: Color(0xFF4A00E0)),
+                      prefixIcon: Icon(Icons.group_outlined, color: _primaryColor),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                     ),
                     hint: const Text('-- Pilih Grup --'),
                     items: gp.groups.map((g) => DropdownMenuItem<int?>(value: g.id, child: Text(g.name, style: const TextStyle(fontWeight: FontWeight.w500)))).toList(),
@@ -251,8 +256,8 @@ class _SettleScreenState extends State<SettleScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                        child: const Icon(Icons.swap_horizontal_circle_rounded, color: Color(0xFF4A00E0), size: 22),
+                        decoration: BoxDecoration(color: _primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                        child: Icon(Icons.swap_horizontal_circle_rounded, color: _primaryColor, size: 22),
                       ),
                       const SizedBox(width: 12),
                       const Text('Alur Transaksi & Nominal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
@@ -260,7 +265,7 @@ class _SettleScreenState extends State<SettleScreen> {
                   ),
                   const SizedBox(height: 24),
                   if (_loadingMembers)
-                    const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator(color: Color(0xFF4A00E0))))
+                    Center(child: Padding(padding: const EdgeInsets.all(16.0), child: CircularProgressIndicator(color: _primaryColor)))
                   else if (_groupId == null)
                     Text('Silakan tentukan grup terlebih dahulu.', style: TextStyle(color: Colors.grey.shade500, fontSize: 13))
                   else if (contactsToShow.isEmpty)
@@ -268,16 +273,16 @@ class _SettleScreenState extends State<SettleScreen> {
                   else ...[
                     DropdownButtonFormField<int>(
                       value: _fromId,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4A00E0)),
+                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryColor),
                       decoration: InputDecoration(
                         labelText: 'Dari (Yang Membayar)',
-                        labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                        labelStyle: TextStyle(color: _primaryColor),
                         filled: true,
                         fillColor: const Color(0xFFF4F6F9),
-                        prefixIcon: const Icon(Icons.person_remove_outlined, color: Color(0xFF4A00E0)),
+                        prefixIcon: Icon(Icons.person_remove_outlined, color: _primaryColor),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                       ),
                       hint: const Text('-- Pilih Pembayar --'),
                       items: contactsToShow.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name, style: const TextStyle(fontWeight: FontWeight.w500)))).toList(),
@@ -287,16 +292,16 @@ class _SettleScreenState extends State<SettleScreen> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<int>(
                       value: _toId,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4A00E0)),
+                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryColor),
                       decoration: InputDecoration(
                         labelText: 'Ke (Yang Menerima)',
-                        labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                        labelStyle: TextStyle(color: _primaryColor),
                         filled: true,
                         fillColor: const Color(0xFFF4F6F9),
-                        prefixIcon: const Icon(Icons.person_add_alt_1_outlined, color: Color(0xFF4A00E0)),
+                        prefixIcon: Icon(Icons.person_add_alt_1_outlined, color: _primaryColor),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                       ),
                       hint: const Text('-- Pilih Penerima --'),
                       items: contactsToShow.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name, style: const TextStyle(fontWeight: FontWeight.w500)))).toList(),
@@ -310,13 +315,13 @@ class _SettleScreenState extends State<SettleScreen> {
                     onChanged: (v) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: 'Total Dana Pelunasan',
-                      labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                      labelStyle: TextStyle(color: _primaryColor),
                       filled: true,
                       fillColor: const Color(0xFFF4F6F9),
-                      prefixIcon: const Icon(Icons.price_check_rounded, color: Color(0xFF4A00E0)),
+                      prefixIcon: Icon(Icons.price_check_rounded, color: _primaryColor),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                     ),
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -328,13 +333,13 @@ class _SettleScreenState extends State<SettleScreen> {
                     controller: _noteCtrl,
                     decoration: InputDecoration(
                       labelText: 'Catatan Pendukung (opsional)',
-                      labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                      labelStyle: TextStyle(color: _primaryColor),
                       filled: true,
                       fillColor: const Color(0xFFF4F6F9),
-                      prefixIcon: const Icon(Icons.notes_rounded, color: Color(0xFF4A00E0)),
+                      prefixIcon: Icon(Icons.notes_rounded, color: _primaryColor),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                     ),
                     maxLines: 2,
                   ),
@@ -361,8 +366,8 @@ class _SettleScreenState extends State<SettleScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                          child: const Icon(Icons.calendar_month_rounded, color: Color(0xFF4A00E0), size: 24),
+                          decoration: BoxDecoration(color: _primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                          child: Icon(Icons.calendar_month_rounded, color: _primaryColor, size: 24),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -375,7 +380,7 @@ class _SettleScreenState extends State<SettleScreen> {
                             ],
                           ),
                         ),
-                        const Icon(Icons.edit_calendar_rounded, color: Color(0xFF4A00E0)),
+                        Icon(Icons.edit_calendar_rounded, color: _primaryColor),
                       ],
                     ),
                   ),
@@ -383,20 +388,13 @@ class _SettleScreenState extends State<SettleScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
+            CustomGradientButton(
               onPressed: _submitting ? null : _submit,
-              icon: _submitting
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.done_all_rounded, size: 22),
-              label: Text(isEdit ? 'Simpan Perubahan' : 'Selesaikan Pembayaran', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4A00E0),
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 4,
-                shadowColor: const Color(0xFF4A00E0).withOpacity(0.4),
-              ),
+              label: isEdit ? 'Simpan Perubahan' : 'Selesaikan Pembayaran',
+              icon: Icons.done_all_rounded,
+              primaryColor: _primaryColor,
+              gradientEndColor: _gradientEndColor,
+              isLoading: _submitting,
             ),
             const SizedBox(height: 40),
           ],
@@ -414,7 +412,7 @@ class _SettleScreenState extends State<SettleScreen> {
     }
   }
 
-  Widget _buildTransferVisual(List<Contact> contactsToShow) {
+  Widget _buildTransferVisual(List<Contact> contactsToShow, Color primaryColor, Color gradientEndColor) {
     if (_fromId == null || _toId == null || contactsToShow.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -429,15 +427,15 @@ class _SettleScreenState extends State<SettleScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+        gradient: LinearGradient(
+          colors: [primaryColor, gradientEndColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4A00E0).withOpacity(0.2),
+            color: primaryColor.withOpacity(0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

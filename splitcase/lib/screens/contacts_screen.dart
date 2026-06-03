@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/contact_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/contact.dart';
 import 'add_contact_screen.dart';
 
@@ -32,6 +33,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
   @override
   Widget build(BuildContext context) {
     final cp = context.watch<ContactProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
@@ -42,12 +46,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: const Color(0xFF4A00E0),
+            backgroundColor: _primaryColor,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                    colors: [_primaryColor, _gradientEndColor],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -82,9 +86,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
           SliverToBoxAdapter(
             child: cp.loading
-                ? const Padding(
-                    padding: EdgeInsets.all(40),
-                    child: Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0))),
+                ? Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Center(child: CircularProgressIndicator(color: _primaryColor)),
                   )
                 : cp.contacts.isEmpty
                     ? Padding(
@@ -96,10 +100,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               Container(
                                 padding: const EdgeInsets.all(32),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF4A00E0).withOpacity(0.05),
+                                  color: _primaryColor.withOpacity(0.05),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.people_outline, size: 80, color: Color(0xFF4A00E0)),
+                                child: Icon(Icons.people_outline, size: 80, color: _primaryColor),
                               ),
                               const SizedBox(height: 32),
                               const Text(
@@ -227,7 +231,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF4A00E0),
+        backgroundColor: _primaryColor,
         foregroundColor: Colors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

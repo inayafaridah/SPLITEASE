@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/contact.dart';
 import '../providers/contact_provider.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/custom_gradient_button.dart';
 
 class AddContactScreen extends StatefulWidget {
   final Contact? existing;
@@ -73,6 +75,10 @@ class _AddContactScreenState extends State<AddContactScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
@@ -143,13 +149,13 @@ class _AddContactScreenState extends State<AddContactScreen> {
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: 'Nama Lengkap',
-                      labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                      labelStyle: TextStyle(color: _primaryColor),
                       filled: true,
                       fillColor: const Color(0xFFF4F6F9),
-                      prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF4A00E0)),
+                      prefixIcon: Icon(Icons.person_outline_rounded, color: _primaryColor),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                     ),
                     validator: (v) => v == null || v.trim().isEmpty ? 'Nama wajib diisi' : null,
                   ),
@@ -159,13 +165,13 @@ class _AddContactScreenState extends State<AddContactScreen> {
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       labelText: 'Nomor WhatsApp / HP',
-                      labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                      labelStyle: TextStyle(color: _primaryColor),
                       filled: true,
                       fillColor: const Color(0xFFF4F6F9),
-                      prefixIcon: const Icon(Icons.phone_android_rounded, color: Color(0xFF4A00E0)),
+                      prefixIcon: Icon(Icons.phone_android_rounded, color: _primaryColor),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                     ),
                     validator: (v) => v == null || v.trim().isEmpty ? 'Nomor HP wajib diisi' : null,
                   ),
@@ -216,20 +222,13 @@ class _AddContactScreenState extends State<AddContactScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
+            CustomGradientButton(
               onPressed: _submitting ? null : _submit,
-              icon: _submitting
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.save_rounded, size: 22),
-              label: Text(isEdit ? 'Simpan Perubahan' : 'Tambah Kontak', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4A00E0),
-                foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 4,
-                shadowColor: const Color(0xFF4A00E0).withOpacity(0.4),
-              ),
+              label: isEdit ? 'Simpan Perubahan' : 'Tambah Kontak',
+              icon: Icons.save_rounded,
+              primaryColor: _primaryColor,
+              gradientEndColor: _gradientEndColor,
+              isLoading: _submitting,
             ),
             const SizedBox(height: 40),
           ],

@@ -9,6 +9,8 @@ import '../models/contact.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/contact_provider.dart';
 import '../providers/group_member_provider.dart';
+import '../providers/theme_provider.dart';
+import '../widgets/custom_gradient_button.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final Group group;
@@ -116,6 +118,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
@@ -133,7 +139,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
       ),
       body: _isLoadingMembers
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0)))
+          ? Center(child: CircularProgressIndicator(color: _primaryColor))
           : Form(
               key: _formKey,
               child: ListView(
@@ -155,8 +161,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                              child: const Icon(Icons.receipt_rounded, color: Color(0xFF4A00E0), size: 22),
+                              decoration: BoxDecoration(color: _primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                              child: Icon(Icons.receipt_rounded, color: _primaryColor, size: 22),
                             ),
                             const SizedBox(width: 12),
                             const Text('Detail Tagihan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
@@ -167,14 +173,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           controller: _descCtrl,
                           decoration: InputDecoration(
                             labelText: 'Keterangan',
-                            labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                            labelStyle: TextStyle(color: _primaryColor),
                             hintText: 'Contoh: Makan ramen',
                             filled: true,
                             fillColor: const Color(0xFFF4F6F9),
-                            prefixIcon: const Icon(Icons.description_outlined, color: Color(0xFF4A00E0)),
+                            prefixIcon: Icon(Icons.description_outlined, color: _primaryColor),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                           ),
                           validator: (v) => v == null || v.trim().isEmpty ? 'Keterangan wajib diisi' : null,
                         ),
@@ -183,14 +189,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           controller: _amountCtrl,
                           decoration: InputDecoration(
                             labelText: 'Jumlah (${widget.group.currency})',
-                            labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                            labelStyle: TextStyle(color: _primaryColor),
                             hintText: '150000',
                             filled: true,
                             fillColor: const Color(0xFFF4F6F9),
-                            prefixIcon: const Icon(Icons.payments_outlined, color: Color(0xFF4A00E0)),
+                            prefixIcon: Icon(Icons.payments_outlined, color: _primaryColor),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                           ),
                           keyboardType: TextInputType.number,
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -205,16 +211,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         const SizedBox(height: 16),
                         DropdownButtonFormField<int>(
                           value: _selectedPayerId,
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4A00E0)),
+                          icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryColor),
                           decoration: InputDecoration(
                             labelText: 'Yang Membayar',
-                            labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                            labelStyle: TextStyle(color: _primaryColor),
                             filled: true,
                             fillColor: const Color(0xFFF4F6F9),
-                            prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF4A00E0)),
+                            prefixIcon: Icon(Icons.person_outline_rounded, color: _primaryColor),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF4A00E0), width: 1.5)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _primaryColor, width: 1.5)),
                           ),
                           items: _groupMembersContacts
                               .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name, style: const TextStyle(fontWeight: FontWeight.w500))))
@@ -247,8 +253,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                                child: const Icon(Icons.calendar_today_rounded, color: Color(0xFF4A00E0), size: 24),
+                                decoration: BoxDecoration(color: _primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                                child: Icon(Icons.calendar_today_rounded, color: _primaryColor, size: 24),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -261,7 +267,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.edit_calendar_rounded, color: Color(0xFF4A00E0)),
+                              Icon(Icons.edit_calendar_rounded, color: _primaryColor),
                             ],
                           ),
                         ),
@@ -269,20 +275,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton.icon(
+                  CustomGradientButton(
                     onPressed: _submitting ? null : _submit,
-                    icon: _submitting
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.save_rounded, size: 22),
-                    label: Text(isEdit ? 'Simpan Perubahan' : 'Simpan Transaksi', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4A00E0),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(56),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                      shadowColor: const Color(0xFF4A00E0).withOpacity(0.4),
-                    ),
+                    label: isEdit ? 'Simpan Perubahan' : 'Simpan Transaksi',
+                    icon: Icons.save_rounded,
+                    primaryColor: _primaryColor,
+                    gradientEndColor: _gradientEndColor,
+                    isLoading: _submitting,
                   ),
                   const SizedBox(height: 40),
                 ],

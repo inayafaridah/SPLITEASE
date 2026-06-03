@@ -11,6 +11,7 @@ import '../providers/transaction_provider.dart';
 import '../providers/contact_provider.dart';
 import '../providers/group_member_provider.dart';
 import '../providers/settlement_provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/split_calculator.dart';
 import '../utils/currency_formatter.dart';
 import '../widgets/debt_balance_card.dart';
@@ -69,6 +70,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   Widget build(BuildContext context) {
     final tp = context.watch<TransactionProvider>();
     final sp = context.watch<SettlementProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
 
     final debts = SplitCalculator.calculate(
       transactions: tp.transactions,
@@ -87,7 +91,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
       body: _isLoadingMembers
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0)))
+          ? Center(child: CircularProgressIndicator(color: _primaryColor))
           : NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
@@ -95,7 +99,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     expandedHeight: 220,
                     pinned: true,
                     elevation: 0,
-                    backgroundColor: const Color(0xFF4A00E0),
+                    backgroundColor: _primaryColor,
                     iconTheme: const IconThemeData(color: Colors.white),
                     title: Text(widget.group.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                     actions: [
@@ -108,9 +112,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     ],
                     flexibleSpace: FlexibleSpaceBar(
                       background: Container(
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                            colors: [_primaryColor, _gradientEndColor],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -161,9 +165,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                         ),
                         child: TabBar(
                           controller: _tabController,
-                          indicatorColor: const Color(0xFF4A00E0),
+                          indicatorColor: _primaryColor,
                           indicatorWeight: 3,
-                          labelColor: const Color(0xFF4A00E0),
+                          labelColor: _primaryColor,
                           unselectedLabelColor: Colors.grey.shade500,
                           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                           tabs: const [
@@ -181,14 +185,14 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildTransactionTab(context, tp),
-                    _buildDebtTab(context, debts, summaries, sp.settlements),
+                    _buildTransactionTab(context, tp, _primaryColor, _gradientEndColor),
+                    _buildDebtTab(context, debts, summaries, sp.settlements, _primaryColor, _gradientEndColor),
                   ],
                 ),
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF4A00E0),
+        backgroundColor: _primaryColor,
         foregroundColor: Colors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -243,8 +247,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     );
   }
 
-  Widget _buildTransactionTab(BuildContext context, TransactionProvider tp) {
-    if (tp.loading) return const Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0)));
+  Widget _buildTransactionTab(BuildContext context, TransactionProvider tp, Color primaryColor, Color gradientEndColor) {
+    if (tp.loading) return Center(child: CircularProgressIndicator(color: primaryColor));
     if (tp.transactions.isEmpty) {
       return Center(
         child: Column(
@@ -252,8 +256,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.05), shape: BoxShape.circle),
-              child: const Icon(Icons.receipt_long_outlined, size: 64, color: Color(0xFF4A00E0)),
+              decoration: BoxDecoration(color: primaryColor.withOpacity(0.05), shape: BoxShape.circle),
+              child: Icon(Icons.receipt_long_outlined, size: 64, color: primaryColor),
             ),
             const SizedBox(height: 16),
             const Text('Belum ada transaksi', style: TextStyle(color: Color(0xFF2D3142), fontSize: 20, fontWeight: FontWeight.bold)),
@@ -298,7 +302,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    _buildTransactionIcon(tx.description),
+                    _buildTransactionIcon(tx.description, primaryColor, gradientEndColor),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -360,6 +364,8 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     List<DebtEntry> debts,
     List<BalanceSummary> summaries,
     List<Settlement> settlements,
+    Color primaryColor,
+    Color gradientEndColor,
   ) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -465,7 +471,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  onTap: () => _showReceiptDialog(context, s),
+                  onTap: () => _showReceiptDialog(context, s, primaryColor, gradientEndColor),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
@@ -506,11 +512,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     );
   }
 
-  Widget _buildTransactionIcon(String description) {
+  Widget _buildTransactionIcon(String description, Color defaultPrimary, Color defaultGradient) {
     final descLower = description.toLowerCase();
     String emoji = '🛍️'; // Default belanja
-    Color bgGradientStart = const Color(0xFF4A00E0);
-    Color bgGradientEnd = const Color(0xFF8E2DE2);
+    Color bgGradientStart = defaultPrimary;
+    Color bgGradientEnd = defaultGradient;
 
     if (descLower.contains('makan') || 
         descLower.contains('ramen') || 
@@ -600,7 +606,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     }
   }
 
-  void _showReceiptDialog(BuildContext context, Settlement s) {
+  void _showReceiptDialog(BuildContext context, Settlement s, Color primaryColor, Color gradientEndColor) {
     final cp = context.read<ContactProvider>();
     final fromContact = cp.contacts.firstWhere(
       (c) => c.id == s.fromContactId,
@@ -642,13 +648,13 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                   Container(
                     width: double.maxFinite,
                     padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                        colors: [primaryColor, gradientEndColor],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                     ),
                     child: Column(
                       children: [
@@ -658,9 +664,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                             color: Colors.white,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.check_circle_rounded,
-                            color: Color(0xFF4A00E0),
+                            color: primaryColor,
                             size: 40,
                           ),
                         ),
@@ -794,7 +800,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(vertical: 14),
-                                  backgroundColor: const Color(0xFF4A00E0),
+                                  backgroundColor: primaryColor,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),

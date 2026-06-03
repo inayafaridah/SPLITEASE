@@ -5,6 +5,7 @@ import '../models/settlement.dart';
 import '../providers/settlement_provider.dart';
 import '../providers/contact_provider.dart';
 import '../providers/group_provider.dart';
+import '../providers/theme_provider.dart';
 import 'settle_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -32,6 +33,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final sp = context.watch<SettlementProvider>();
     final cp = context.watch<ContactProvider>();
     final gp = context.watch<GroupProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
 
     final validGroupIds = gp.groups.map((g) => g.id).toSet();
     if (_filterGroupId != null && !validGroupIds.contains(_filterGroupId)) {
@@ -57,12 +61,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: const Color(0xFF4A00E0),
+            backgroundColor: _primaryColor,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                    colors: [_primaryColor, _gradientEndColor],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -97,9 +101,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           SliverToBoxAdapter(
             child: sp.loading
-                ? const Padding(
-                    padding: EdgeInsets.all(40),
-                    child: Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0))),
+                ? Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Center(child: CircularProgressIndicator(color: _primaryColor)),
                   )
                 : Column(
                     children: [
@@ -116,14 +120,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           child: DropdownButtonFormField<int?>(
                             key: ValueKey('filter_${gp.groups.length}_${gp.groups.map((g) => g.id).join(',')}'),
                             value: _filterGroupId,
-                            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF4A00E0)),
+                            icon: Icon(Icons.keyboard_arrow_down_rounded, color: _primaryColor),
                             decoration: InputDecoration(
                               labelText: 'Filter Grup',
-                              labelStyle: const TextStyle(color: Color(0xFF4A00E0)),
+                              labelStyle: TextStyle(color: _primaryColor),
                               filled: true,
                               fillColor: Colors.transparent,
                               isDense: true,
-                              prefixIcon: const Icon(Icons.filter_list_rounded, color: Color(0xFF4A00E0)),
+                              prefixIcon: Icon(Icons.filter_list_rounded, color: _primaryColor),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                             ),
@@ -144,8 +148,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               children: [
                                 Container(
                                   padding: const EdgeInsets.all(32),
-                                  decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.05), shape: BoxShape.circle),
-                                  child: const Icon(Icons.history_toggle_off_rounded, size: 80, color: Color(0xFF4A00E0)),
+                                  decoration: BoxDecoration(color: _primaryColor.withOpacity(0.05), shape: BoxShape.circle),
+                                  child: Icon(Icons.history_toggle_off_rounded, size: 80, color: _primaryColor),
                                 ),
                                 const SizedBox(height: 32),
                                 const Text('Belum ada pelunasan', style: TextStyle(color: Color(0xFF2D3142), fontSize: 22, fontWeight: FontWeight.bold)),
@@ -193,7 +197,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
                           child: Align(alignment: Alignment.centerLeft, child: Text('Daftar Pelunasan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142)))),
                         ),
-                        _buildList(context, displayedSettlements),
+                        _buildList(context, displayedSettlements, _primaryColor),
                         const SizedBox(height: 80),
                       ],
                     ],
@@ -202,7 +206,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF4A00E0),
+        backgroundColor: _primaryColor,
         foregroundColor: Colors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -216,7 +220,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildList(BuildContext context, List<Settlement> settlements) {
+  Widget _buildList(BuildContext context, List<Settlement> settlements, Color primaryColor) {
     final sp = context.read<SettlementProvider>();
     final cp = context.read<ContactProvider>();
     final gp = context.read<GroupProvider>();
@@ -279,8 +283,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             const SizedBox(height: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(color: const Color(0xFF4A00E0).withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-                              child: Text(groupName, style: const TextStyle(fontSize: 11, color: Color(0xFF4A00E0), fontWeight: FontWeight.bold)),
+                              decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                              child: Text(groupName, style: TextStyle(fontSize: 11, color: primaryColor, fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ],

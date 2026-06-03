@@ -7,6 +7,7 @@ import '../models/group.dart';
 import '../providers/group_provider.dart';
 import '../providers/contact_provider.dart';
 import '../providers/group_member_provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/preferences_service.dart';
 import 'group_detail_screen.dart';
 import 'add_contact_screen.dart';
@@ -404,6 +405,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final gp = context.watch<GroupProvider>();
+    final themeProvider = context.watch<ThemeProvider>();
+    final _primaryColor = themeProvider.primaryColor;
+    final _gradientEndColor = themeProvider.gradientEndColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9), // Soft premium background
@@ -414,12 +418,12 @@ class _HomeScreenState extends State<HomeScreen> {
             floating: false,
             pinned: true,
             elevation: 0,
-            backgroundColor: const Color(0xFF4A00E0),
+            backgroundColor: _primaryColor,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+                    colors: [_primaryColor, _gradientEndColor],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -481,16 +485,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SliverToBoxAdapter(
             child: gp.loading
-                ? const Padding(
-                    padding: EdgeInsets.all(40),
-                    child: Center(child: CircularProgressIndicator(color: Color(0xFF4A00E0))),
+                ? Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Center(child: CircularProgressIndicator(color: _primaryColor)),
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildDashboardCard(context),
+                      _buildDashboardCard(context, _primaryColor, _gradientEndColor),
                       if (gp.groups.isEmpty)
-                        _buildEmptyState()
+                        _buildEmptyState(_primaryColor)
                       else ...[
                         const Padding(
                           padding: EdgeInsets.only(left: 24, top: 24, bottom: 4),
@@ -510,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemCount: gp.groups.length,
                           itemBuilder: (ctx, i) {
                             final group = gp.groups[i];
-                            return _buildGroupCard(context, group);
+                            return _buildGroupCard(context, group, _primaryColor, _gradientEndColor);
                           },
                         ),
                       ],
@@ -520,7 +524,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF4A00E0),
+        backgroundColor: _primaryColor,
         foregroundColor: Colors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -550,7 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(Color primaryColor) {
     return Padding(
       padding: const EdgeInsets.only(top: 80),
       child: Center(
@@ -560,10 +564,10 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: const Color(0xFF4A00E0).withOpacity(0.05),
+                color: primaryColor.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.group_outlined, size: 80, color: Color(0xFF4A00E0)),
+              child: Icon(Icons.group_outlined, size: 80, color: primaryColor),
             ),
             const SizedBox(height: 32),
             const Text(
@@ -582,7 +586,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGroupCard(BuildContext context, Group group) {
+  Widget _buildGroupCard(BuildContext context, Group group, Color primaryColor, Color gradientEndColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -608,7 +612,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                _buildGroupIcon(group.name),
+                _buildGroupIcon(group.name, primaryColor, gradientEndColor),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -659,11 +663,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGroupIcon(String groupName) {
+  Widget _buildGroupIcon(String groupName, Color defaultPrimary, Color defaultGradient) {
     final nameLower = groupName.toLowerCase();
     String emoji = '👥';
-    Color startColor = const Color(0xFF4A00E0);
-    Color endColor = const Color(0xFF8E2DE2);
+    Color startColor = defaultPrimary;
+    Color endColor = defaultGradient;
 
     if (nameLower.contains('makan') || 
         nameLower.contains('dinner') || 
@@ -743,22 +747,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDashboardCard(BuildContext context) {
+  Widget _buildDashboardCard(BuildContext context, Color primaryColor, Color gradientEndColor) {
     final gp = context.watch<GroupProvider>();
     final cp = context.watch<ContactProvider>();
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 20, 20, 4),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+        gradient: LinearGradient(
+          colors: [gradientEndColor, primaryColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4A00E0).withOpacity(0.2),
+            color: primaryColor.withOpacity(0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
