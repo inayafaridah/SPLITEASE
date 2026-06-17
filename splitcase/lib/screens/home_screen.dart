@@ -12,6 +12,7 @@ import '../services/preferences_service.dart';
 import 'group_detail_screen.dart';
 import 'add_contact_screen.dart';
 import 'settings_screen.dart'; 
+import '../widgets/wave_background_painter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -420,14 +421,9 @@ class _HomeScreenState extends State<HomeScreen> {
             elevation: 0,
             backgroundColor: _primaryColor,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [_primaryColor, _gradientEndColor],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+              background: WaveBackground(
+                primaryColor: _primaryColor,
+                gradientEndColor: _gradientEndColor,
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),

@@ -7,6 +7,8 @@ import '../providers/contact_provider.dart';
 import '../providers/group_provider.dart';
 import '../providers/theme_provider.dart';
 import 'settle_screen.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import '../widgets/wave_background_painter.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({Key? key}) : super(key: key);
@@ -63,14 +65,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
             elevation: 0,
             backgroundColor: _primaryColor,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [_primaryColor, _gradientEndColor],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+              background: WaveBackground(
+                primaryColor: _primaryColor,
+                gradientEndColor: _gradientEndColor,
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -250,48 +247,85 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 .firstWhere((_) => true, orElse: () => 'Grup dihapus')
             : '';
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        return Slidable(
+          key: ValueKey(s.id),
+          endActionPane: ActionPane(
+            motion: const DrawerMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (_) async {
+                  await sp.remove(s.id!);
+                  sp.loadAll();
+                },
+                backgroundColor: Colors.red.shade400,
+                foregroundColor: Colors.white,
+                icon: Icons.delete,
+                label: 'Hapus',
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ],
           ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
+          startActionPane: ActionPane(
+            motion: const DrawerMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => SettleScreen(existing: s)),
+                  ).then((_) => context.read<SettlementProvider>().loadAll());
+                },
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+                icon: Icons.edit,
+                label: 'Edit',
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ],
+          ),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              onTap: () => _settlementOptions(context, s, sp),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.check_rounded, color: Colors.green, size: 24),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('$fromName ➔ $toName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142))),
-                          const SizedBox(height: 6),
-                          Text('Rp ${s.amount.toStringAsFixed(0)}', style: const TextStyle(color: Colors.green, fontSize: 15, fontWeight: FontWeight.bold)),
-                          if (groupName.isNotEmpty) ...[
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-                              child: Text(groupName, style: TextStyle(fontSize: 11, color: primaryColor, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => _settlementOptions(context, s, sp),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.check_rounded, color: Colors.green, size: 24),
                       ),
-                    ),
-                    Icon(Icons.more_vert_rounded, color: Colors.grey.shade400),
-                  ],
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('$fromName ➔ $toName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142))),
+                            const SizedBox(height: 6),
+                            Text('Rp ${s.amount.toStringAsFixed(0)}', style: const TextStyle(color: Colors.green, fontSize: 15, fontWeight: FontWeight.bold)),
+                            if (groupName.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                                child: Text(groupName, style: TextStyle(fontSize: 11, color: primaryColor, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.more_vert_rounded, color: Colors.grey.shade400),
+                    ],
+                  ),
                 ),
               ),
             ),
