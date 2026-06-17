@@ -50,12 +50,13 @@ class DatabaseHelper {
     // Transactions
     await db.execute('''
       CREATE TABLE $kTableTransactions (
-        id               INTEGER PRIMARY KEY AUTOINCREMENT,
-        group_id         INTEGER NOT NULL,
-        payer_contact_id INTEGER NOT NULL,
-        amount           REAL    NOT NULL,
-        description      TEXT    NOT NULL,
-        date             TEXT    NOT NULL,
+        id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id           INTEGER NOT NULL,
+        payer_contact_id   INTEGER NOT NULL,
+        amount             REAL    NOT NULL,
+        description        TEXT    NOT NULL,
+        date               TEXT    NOT NULL,
+        receipt_image_path TEXT,
         FOREIGN KEY (group_id) REFERENCES $kTableGroups(id) ON DELETE CASCADE,
         FOREIGN KEY (payer_contact_id) REFERENCES $kTableContacts(id) ON DELETE SET NULL
       )
@@ -112,6 +113,12 @@ class DatabaseHelper {
       } catch (_) {
         // Kolom sudah ada
       }
+    }
+
+    if (oldVersion < 4) {
+      try {
+        await db.execute('ALTER TABLE $kTableTransactions ADD COLUMN receipt_image_path TEXT');
+      } catch (_) {}
     }
   }
 }

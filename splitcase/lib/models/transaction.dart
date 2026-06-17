@@ -6,6 +6,7 @@ class Transaction {
   final double amount;
   final String description;
   final String date;
+  final String? receiptImagePath;
 
   Transaction({
     this.id,
@@ -13,6 +14,7 @@ class Transaction {
     required this.payerContactId,
     required this.amount,
     required this.description,
+    this.receiptImagePath,
     String? date,
   }) : date = date ?? DateTime.now().toIso8601String();
 
@@ -23,6 +25,7 @@ class Transaction {
         'amount': amount,
         'description': description,
         'date': date,
+        if (receiptImagePath != null) 'receipt_image_path': receiptImagePath,
       };
 
   factory Transaction.fromMap(Map<String, dynamic> map) => Transaction(
@@ -32,6 +35,7 @@ class Transaction {
         amount: (map['amount'] as num).toDouble(),
         description: map['description'] as String,
         date: map['date'] as String,
+        receiptImagePath: map['receipt_image_path'] as String?,
       );
 
   Transaction copyWith({
@@ -41,6 +45,7 @@ class Transaction {
     double? amount,
     String? description,
     String? date,
+    String? receiptImagePath,
   }) =>
       Transaction(
         id: id ?? this.id,
@@ -49,6 +54,7 @@ class Transaction {
         amount: amount ?? this.amount,
         description: description ?? this.description,
         date: date ?? this.date,
+        receiptImagePath: receiptImagePath ?? this.receiptImagePath,
       );
 
   @override

@@ -1,4 +1,5 @@
 // lib/screens/group_detail_screen.dart
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -15,9 +16,12 @@ import '../providers/settlement_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/split_calculator.dart';
 import '../services/pdf_export_service.dart';
-import '../utils/currency_formatter.dart';
+import '../widgets/split_pie_chart.dart';
 import '../widgets/debt_balance_card.dart';
+import '../widgets/receipt_border_painter.dart';
 import '../widgets/wave_background_painter.dart';
+import '../utils/currency_formatter.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'add_transaction_screen.dart';
 import 'settle_screen.dart';
 
@@ -191,6 +195,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
               body: Container(
                 color: Colors.white,
                 child: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
                   controller: _tabController,
                   children: [
                     _buildTransactionTab(context, tp, _primaryColor, _gradientEndColor),
@@ -283,94 +288,138 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       itemBuilder: (ctx, i) {
         final tx = tp.transactions[i];
         final payerName = cp.nameById(tx.payerContactId);
-          return Slidable(
-          key: ValueKey(tx.id),
-          endActionPane: ActionPane(
-            motion: const BehindMotion(),
-            children: [
-              SlidableAction(
-                onPressed: (_) => _confirmDeleteTransaction(context, tx, tp),
-                backgroundColor: Colors.red.shade400,
-                foregroundColor: Colors.white,
-                icon: Icons.delete_rounded,
-                label: 'Hapus',
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ],
-          ),
-          startActionPane: ActionPane(
-            motion: const BehindMotion(),
-            children: [
-              SlidableAction(
-                onPressed: (_) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
-                    ),
-                  ).then((_) => _loadAllScreenData());
-                },
-                backgroundColor: Colors.indigo,
-                foregroundColor: Colors.white,
-                icon: Icons.edit_rounded,
-                label: 'Edit',
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ],
-          ),
-          child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade100),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
-                  ),
-                ).then((_) => _loadAllScreenData());
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    _buildTransactionIcon(tx.description, primaryColor, gradientEndColor),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(tx.description, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142))),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Oleh $payerName · ${DateFormat('dd MMM').format(DateTime.tryParse(tx.date) ?? DateTime.now())}',
-                            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                          ),
-                        ],
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Slidable(
+            key: ValueKey(tx.id),
+            endActionPane: ActionPane(
+              motion: const DrawerMotion(),
+              extentRatio: 0.25,
+              children: [
+                SlidableAction(
+                  onPressed: (_) => _confirmDeleteTransaction(context, tx, tp),
+                  backgroundColor: Colors.red.shade400,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete_rounded,
+                  label: 'Hapus',
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ],
+            ),
+            startActionPane: ActionPane(
+              motion: const DrawerMotion(),
+              extentRatio: 0.25,
+              children: [
+                SlidableAction(
+                  onPressed: (_) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
-                    ),
-                  ],
+                    ).then((_) => _loadAllScreenData());
+                  },
+                  backgroundColor: Colors.indigo,
+                  foregroundColor: Colors.white,
+                  icon: Icons.edit_rounded,
+                  label: 'Edit',
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ],
+            ),
+            child: ReceiptCard(
+              color: Colors.white,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
+                      ),
+                    ).then((_) => _loadAllScreenData());
+                  },
+                  child: Row(
+                    children: [
+                      _buildTransactionIcon(tx.description, primaryColor, gradientEndColor),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(child: Text(tx.description, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3142)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                if (tx.receiptImagePath != null)
+                                  const SizedBox(width: 4), // Placeholder if needed
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Oleh $payerName · ${DateFormat('dd MMM').format(DateTime.tryParse(tx.date) ?? DateTime.now())}',
+                              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                            ),
+                            if (tx.receiptImagePath != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (ctx) => Dialog(
+                                        backgroundColor: Colors.transparent,
+                                        insetPadding: const EdgeInsets.all(16),
+                                        child: Stack(
+                                          alignment: Alignment.topRight,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(16),
+                                              child: Image.file(File(tx.receiptImagePath!)),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                                              onPressed: () => Navigator.pop(ctx),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.receipt_long, size: 14, color: Colors.orange),
+                                        SizedBox(width: 4),
+                                        Text('Lihat Struk', style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          ),
-        );;
+          ).animate(delay: (i * 50).ms).slideX(begin: 0.1, duration: 300.ms, curve: Curves.easeOutQuad).fadeIn(),
+        );
       },
     );
   }
