@@ -17,7 +17,7 @@ class SettlementDao {
     );
   }
 
-  /// Ambil SEMUA settlement (dipakai oleh loadAll di provider)
+  /// Ambil SEMUA settlement (dipakai oleh loadAll di provider) 
   Future<List<Settlement>> getAll() async {
     final db = await _db;
     final maps = await db.query(kTableSettlements, orderBy: 'date DESC');
