@@ -5,6 +5,8 @@ import '../providers/contact_provider.dart';
 import '../providers/theme_provider.dart';
 import '../models/contact.dart';
 import 'add_contact_screen.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import '../widgets/wave_background_painter.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -48,14 +50,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
             elevation: 0,
             backgroundColor: _primaryColor,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [_primaryColor, _gradientEndColor],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+              background: WaveBackground(
+                primaryColor: _primaryColor,
+                gradientEndColor: _gradientEndColor,
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -127,99 +124,133 @@ class _ContactsScreenState extends State<ContactsScreen> {
                         itemCount: cp.contacts.length,
                         itemBuilder: (ctx, i) {
                           final contact = cp.contacts[i];
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.03),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
+                          return Slidable(
+                            key: ValueKey(contact.id),
+                            endActionPane: ActionPane(
+                              motion: const BehindMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (_) => _confirmDelete(context, contact, cp),
+                                  backgroundColor: Colors.red.shade400,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete_rounded,
+                                  label: 'Hapus',
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
                               ],
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
+                            startActionPane: ActionPane(
+                              motion: const BehindMotion(),
+                              children: [
+                                SlidableAction(
+                                  onPressed: (_) => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => AddContactScreen(existing: contact),
+                                    ),
+                                  ).then((_) => cp.loadAll()),
+                                  backgroundColor: Colors.indigo,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.edit_rounded,
+                                  label: 'Edit',
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ],
+                            ),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AddContactScreen(existing: contact),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
                                   ),
-                                ).then((_) => cp.loadAll()),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 52,
-                                        height: 52,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              _parseColor(contact.avatarColor),
-                                              _parseColor(contact.avatarColor).withRed((_parseColor(contact.avatarColor).red - 20).clamp(0, 255)),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => AddContactScreen(existing: contact),
+                                    ),
+                                  ).then((_) => cp.loadAll()),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 52,
+                                          height: 52,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                _parseColor(contact.avatarColor),
+                                                _parseColor(contact.avatarColor).withRed((_parseColor(contact.avatarColor).red - 20).clamp(0, 255)),
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                            borderRadius: BorderRadius.circular(16),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: _parseColor(contact.avatarColor).withOpacity(0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
+                                              ),
                                             ],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
                                           ),
-                                          borderRadius: BorderRadius.circular(16),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: _parseColor(contact.avatarColor).withOpacity(0.3),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            contact.initials,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              contact.name,
+                                          child: Center(
+                                            child: Text(
+                                              contact.initials,
                                               style: const TextStyle(
+                                                color: Colors.white,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 17,
-                                                color: Color(0xFF2D3142),
+                                                fontSize: 20,
                                               ),
                                             ),
-                                            if (contact.phone.isNotEmpty) ...[
-                                              const SizedBox(height: 6),
-                                              Row(
-                                                children: [
-                                                  Icon(Icons.phone_outlined, size: 14, color: Colors.grey.shade500),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    contact.phone,
-                                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.delete_outline, size: 24, color: Colors.red.shade300),
-                                        onPressed: () => _confirmDelete(context, contact, cp),
-                                      ),
-                                    ],
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                contact.name,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 17,
+                                                  color: Color(0xFF2D3142),
+                                                ),
+                                              ),
+                                              if (contact.phone.isNotEmpty) ...[
+                                                const SizedBox(height: 6),
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.phone_outlined, size: 14, color: Colors.grey.shade500),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      contact.phone,
+                                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.delete_outline, size: 24, color: Colors.red.shade300),
+                                          onPressed: () => _confirmDelete(context, contact, cp),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

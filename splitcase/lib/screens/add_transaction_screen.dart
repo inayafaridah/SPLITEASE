@@ -11,6 +11,7 @@ import '../providers/contact_provider.dart';
 import '../providers/group_member_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/custom_gradient_button.dart';
+import '../widgets/draggable_split_card.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final Group group;
@@ -32,6 +33,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   bool _submitting = false;
   List<Contact> _groupMembersContacts = [];
   bool _isLoadingMembers = true;
+  List<int> _splitParticipantIds = [];
 
   bool get isEdit => widget.existing != null;
 
@@ -60,6 +62,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         _groupMembersContacts = contactProvider.contacts
             .where((c) => memberIds.contains(c.id))
             .toList();
+        _splitParticipantIds = _groupMembersContacts.map((c) => c.id!).toList();
         _isLoadingMembers = false;
       });
     }
@@ -273,6 +276,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         ),
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Custom Widget Interaktif: DraggableSplitCard (Anggota 2)
+                  DraggableSplitCard(
+                    availableContacts: _groupMembersContacts,
+                    initialSelectedIds: _splitParticipantIds,
+                    totalAmount: double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0,
+                    currency: widget.group.currency,
+                    primaryColor: _primaryColor,
+                    gradientEndColor: _gradientEndColor,
+                    onChanged: (ids) {
+                      setState(() => _splitParticipantIds = ids);
+                    },
                   ),
                   const SizedBox(height: 32),
                   CustomGradientButton(

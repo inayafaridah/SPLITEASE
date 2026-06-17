@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import '../models/group.dart';
 import '../models/transaction.dart';
 import '../models/contact.dart';
@@ -13,8 +14,10 @@ import '../providers/group_member_provider.dart';
 import '../providers/settlement_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/split_calculator.dart';
+import '../services/pdf_export_service.dart';
 import '../utils/currency_formatter.dart';
 import '../widgets/debt_balance_card.dart';
+import '../widgets/wave_background_painter.dart';
 import 'add_transaction_screen.dart';
 import 'settle_screen.dart';
 
@@ -104,6 +107,16 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                     title: Text(widget.group.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                     actions: [
                       IconButton(
+                        icon: const Icon(Icons.picture_as_pdf_rounded),
+                        tooltip: 'Export PDF',
+                        onPressed: () => PdfExportService.showGroupReport(
+                          group: widget.group,
+                          transactions: tp.transactions,
+                          contacts: _filteredGroupContacts,
+                          settlements: sp.settlements,
+                        ),
+                      ),
+                      IconButton(
                         icon: const Icon(Icons.add_card_rounded),
                         tooltip: 'Tambah Transaksi',
                         onPressed: () => _addTransaction(),
@@ -111,14 +124,9 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                       const SizedBox(width: 8),
                     ],
                     flexibleSpace: FlexibleSpaceBar(
-                      background: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [_primaryColor, _gradientEndColor],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
+                      background: WaveBackground(
+                        primaryColor: _primaryColor,
+                        gradientEndColor: _gradientEndColor,
                         child: SafeArea(
                           child: Padding(
                             padding: const EdgeInsets.only(top: 60, left: 24, right: 24),
@@ -275,7 +283,42 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
       itemBuilder: (ctx, i) {
         final tx = tp.transactions[i];
         final payerName = cp.nameById(tx.payerContactId);
-        return Container(
+          return Slidable(
+          key: ValueKey(tx.id),
+          endActionPane: ActionPane(
+            motion: const BehindMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (_) => _confirmDeleteTransaction(context, tx, tp),
+                backgroundColor: Colors.red.shade400,
+                foregroundColor: Colors.white,
+                icon: Icons.delete_rounded,
+                label: 'Hapus',
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ],
+          ),
+          startActionPane: ActionPane(
+            motion: const BehindMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
+                    ),
+                  ).then((_) => _loadAllScreenData());
+                },
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+                icon: Icons.edit_rounded,
+                label: 'Edit',
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ],
+          ),
+          child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -290,7 +333,6 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: () {
-                // Ketuk biasa membuka form edit untuk memudahkan pengguna
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -318,43 +360,17 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AddTransactionScreen(group: widget.group, existing: tx),
-                                  ),
-                                ).then((_) => _loadAllScreenData());
-                              },
-                              child: const Icon(Icons.edit_outlined, size: 18, color: Colors.indigo),
-                            ),
-                            const SizedBox(width: 16),
-                            GestureDetector(
-                              onTap: () => _confirmDeleteTransaction(context, tx, tp),
-                              child: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                            ),
-                          ],
-                        ),
-                      ],
+                    Text(
+                      CurrencyFormatter.format(tx.amount, currency: widget.group.currency),
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-        );
+          ),
+        );;
       },
     );
   }
