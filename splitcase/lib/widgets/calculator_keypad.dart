@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:vibration/vibration.dart';
 
 class CalculatorKeypad extends StatefulWidget {
   final String initialValue;
@@ -29,6 +30,7 @@ class _CalculatorKeypadState extends State<CalculatorKeypad> {
   }
 
   void _onKeyPress(String key) {
+    Vibration.vibrate(duration: 30);
     setState(() {
       if (key == 'C') {
         _expression = '';

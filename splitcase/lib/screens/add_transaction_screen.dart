@@ -13,6 +13,7 @@ import '../providers/theme_provider.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:confetti/confetti.dart';
 import '../widgets/custom_gradient_button.dart';
 import '../widgets/draggable_split_card.dart';
 import '../widgets/calculator_keypad.dart';
@@ -40,11 +41,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   List<int> _splitParticipantIds = [];
   String? _receiptImagePath;
 
+  late ConfettiController _confettiController;
+
   bool get isEdit => widget.existing != null;
 
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
     if (isEdit) {
       final tx = widget.existing!;
       _descCtrl.text = tx.description;
@@ -78,6 +82,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void dispose() {
     _descCtrl.dispose();
     _amountCtrl.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -92,9 +97,34 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Future<void> _pickAndCropImage() async {
+    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.blue),
+              title: const Text('Ambil dari Kamera'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.purple),
+              title: const Text('Pilih dari Galeri'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await picker.pickImage(source: source);
       
       if (image != null) {
         // Cek apakah platform adalah desktop (Windows/Linux) karena image_cropper belum support desktop
@@ -195,6 +225,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       await tp.add(tx);
     }
 
+    _confettiController.play();
+    await Future.delayed(const Duration(seconds: 2));
+
     if (mounted) Navigator.pop(context);
   }
 
@@ -220,13 +253,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           ),
         ),
       ),
-      body: _isLoadingMembers
-          ? Center(child: CircularProgressIndicator(color: _primaryColor))
-          : Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                children: [
+      body: Stack(
+        children: [
+          _isLoadingMembers
+              ? Center(child: CircularProgressIndicator(color: _primaryColor))
+              : Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    children: [
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -434,6 +469,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ],
               ),
             ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

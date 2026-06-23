@@ -24,6 +24,7 @@ import '../utils/currency_formatter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'add_transaction_screen.dart';
 import 'settle_screen.dart';
+import 'package:photo_view/photo_view.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final Group group;
@@ -366,28 +367,55 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: GestureDetector(
                                   onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (ctx) => Dialog(
-                                        backgroundColor: Colors.transparent,
-                                        insetPadding: const EdgeInsets.all(16),
-                                        child: Stack(
-                                          alignment: Alignment.topRight,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius: BorderRadius.circular(16),
-                                              child: Image.file(File(tx.receiptImagePath!)),
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => Scaffold(
+                                          backgroundColor: const Color(0xFF1E1E1E),
+                                          appBar: AppBar(
+                                            backgroundColor: Colors.transparent,
+                                            elevation: 0,
+                                            iconTheme: const IconThemeData(color: Colors.white),
+                                            title: const Text(
+                                              'Detail Bukti Transaksi',
+                                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                             ),
-                                            IconButton(
-                                              icon: const Icon(Icons.close, color: Colors.white, size: 32),
-                                              onPressed: () => Navigator.pop(ctx),
-                                            ),
-                                          ],
+                                            centerTitle: true,
+                                          ),
+                                          extendBodyBehindAppBar: true,
+                                          body: Stack(
+                                            children: [
+                                              PhotoView(
+                                                imageProvider: FileImage(File(tx.receiptImagePath!)),
+                                                backgroundDecoration: const BoxDecoration(color: Color(0xFF1E1E1E)),
+                                                minScale: PhotoViewComputedScale.contained * 0.8,
+                                                maxScale: PhotoViewComputedScale.covered * 3,
+                                                heroAttributes: PhotoViewHeroAttributes(tag: 'receipt_${tx.id}'),
+                                              ),
+                                              // Tambahkan hiasan kertas sobek di bagian bawah sebagai Overlay
+                                              Positioned(
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                child: IgnorePointer(
+                                                  child: Container(
+                                                    height: 30,
+                                                    color: Colors.transparent,
+                                                    child: CustomPaint(
+                                                      painter: ReceiptBorderPainter(color: Colors.white.withOpacity(0.1), drawBottom: true, drawTop: false),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     );
                                   },
-                                  child: Container(
+                                  child: Hero(
+                                    tag: 'receipt_${tx.id}',
+                                    child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: Colors.orange.withOpacity(0.1),
@@ -402,6 +430,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
                                         Text('Lihat Struk', style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
                                       ],
                                     ),
+                                  ),
                                   ),
                                 ),
                               ),
@@ -435,6 +464,15 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       children: [
+        if (settlements.isNotEmpty) ...[
+          const Text('Visualisasi Data', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
+          const SizedBox(height: 12),
+          SplitPieChart(
+            settlements: settlements,
+            contacts: _filteredGroupContacts,
+          ),
+          const SizedBox(height: 24),
+        ],
         ...summaries.map((s) => DebtBalanceCard(summary: s, currency: widget.group.currency)),
         const SizedBox(height: 20),
         const Text('Penyelesaian Otomatis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF2D3142))),
